@@ -32,7 +32,7 @@ namespace Planbee
         int IN_AutoColor;
         int IN_plane;
         int IN_perimCurve;
-        int IN_coreCurve;
+        int IN_coreCurves;
         int IN_rects;
         int IN_partitions;
         int IN_attCrvs;
@@ -54,7 +54,7 @@ namespace Planbee
             pManager[2].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurve = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extents of the core boundary", GH_ParamAccess.item);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describes the extent of the core boundaries", GH_ParamAccess.list);
             IN_partitions = pManager.AddCurveParameter("Partition Curves", "Partitions", "Polylines describing partitions", GH_ParamAccess.list);
             IN_attCrvs = pManager.AddCurveParameter("Attractor Curves", "Attractors", "Attractor curves describing the boundaries of building profiles that are of interest - attractors", GH_ParamAccess.list);
             IN_obstCrvs = pManager.AddCurveParameter("Obstacle Curves", "Obstacles", "Obstacles blocking the view of attractor buildings/profiles", GH_ParamAccess.list);
@@ -76,7 +76,7 @@ namespace Planbee
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve perimeter = null;
-            Curve core = null;
+            List<Curve> coreCrvs = null;
             List<Curve> interiorPartitions = new List<Curve>();
             List<Curve> attractors = new List<Curve>();
             List<Curve> obstacles = new List<Curve>();
@@ -96,7 +96,7 @@ namespace Planbee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurve, ref core);
+                    DA.GetDataList(IN_coreCurves, coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
@@ -104,9 +104,9 @@ namespace Planbee
                     DA.GetDataList(IN_obstCrvs, obstacles);
 
                     if(iReset)
-                        _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, attractors, obstacles, plane);
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
                     else if (_plan == null)
-                        _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, attractors, obstacles, plane);
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
 
                     Task<SolveResults> task = Task.Run(() => ComputeAttractions(_plan), CancelToken);
                     TaskList.Add(task);
@@ -124,14 +124,14 @@ namespace Planbee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurve, ref core);
+                    DA.GetData(IN_coreCurves, ref coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     DA.GetDataList(IN_attCrvs, attractors);
                     DA.GetDataList(IN_obstCrvs, obstacles);
 
-                    _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, attractors, obstacles, plane);
+                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
                     result = ComputeAttractions(_plan);
                     _plan = result.Value;
                 }

@@ -47,7 +47,7 @@ namespace Planbee
         int IN_AutoColor;
         int IN_plane;
         int IN_perimCurve;
-        int IN_coreCurve;
+        int IN_coreCurves;
         int IN_rects;
         int IN_partitions;
         int OUT_isovistMetric;
@@ -65,7 +65,7 @@ namespace Planbee
             pManager[2].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurve = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extentds of the core boundary", GH_ParamAccess.item);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extent of the core boundaries", GH_ParamAccess.list);
             IN_partitions = pManager.AddCurveParameter("Partition Curves", "Partitions", "Polylines describing partitions", GH_ParamAccess.list);
         }
 
@@ -85,7 +85,7 @@ namespace Planbee
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve perimeter = null;
-            Curve core = null;
+            List<Curve> coreCrvs = null;
             List<Curve> interiorPartitions;
             Plane plane = Plane.Unset;
             bool iReset = false;
@@ -102,14 +102,14 @@ namespace Planbee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurve, ref core);
+                    DA.GetDataList(IN_coreCurves, coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     if (iReset)
-                        _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, plane);
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
                     else if (_plan == null)
-                        _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, plane);
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
 
 
                     Task<SolveResults> task = Task.Run(() => ComputeIso(_plan), CancelToken);
@@ -126,11 +126,11 @@ namespace Planbee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurve, ref core);
+                    DA.GetData(IN_coreCurves, ref coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    _plan = new SmartPlan(perimeter, core, rectangles, interiorPartitions, plane);
+                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
                     result = ComputeIso(_plan);
                     _plan = result.Value;
 

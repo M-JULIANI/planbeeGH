@@ -21,7 +21,7 @@ namespace Planbee
         int IN_plane;
         int IN_coreMode;
         int IN_perimCurve;
-        int IN_coreCurve;
+        int IN_coreCurves;
         int IN_resolution;
         int IN_leaseSpan;
         int IN_areas;
@@ -39,7 +39,7 @@ namespace Planbee
             pManager[1].Optional = true;
             IN_coreMode = pManager.AddIntegerParameter("Core Mode", "Mode", "0: Provide core curve , 1: Offset core using lease span. If no mode is provided a standard offset is used", GH_ParamAccess.item, 1);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurve = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extentds of the core boundary", GH_ParamAccess.item);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extents of the core boundaries", GH_ParamAccess.list);
             IN_resolution = pManager.AddNumberParameter("Target resolution", "Resolution", "Resolution of smart plan within reasonable range. The component takes care of the subdivisions not being too high or too low.", GH_ParamAccess.item);
             IN_leaseSpan = pManager.AddNumberParameter("Target lease span", "Lease span", "If a core curve is not provided, a target lease span kicks in to define a core boundary", GH_ParamAccess.item, 25);
 
@@ -54,7 +54,7 @@ namespace Planbee
             OUT_areaFeedback = pManager.AddTextParameter("Area feedback", "Area feedback", "Provides feedback as to whether desired areas are being met with current configuration", GH_ParamAccess.item);
             OUT_cells = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "Analysis unit size", GH_ParamAccess.list);
             OUT_perimeter = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            OUT_core = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extentds of the core boundary", GH_ParamAccess.item);
+            OUT_core = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extents of the core boundaries", GH_ParamAccess.list);
             OUT_resolution = pManager.AddNumberParameter("Resolution", "Resolution", "This final resolution may differ from the input resolution as this component takes care of ensuring the resolution isn't too fine or coarse.", GH_ParamAccess.item);
         }
 
@@ -66,7 +66,7 @@ namespace Planbee
         {
 
             Curve perimeter = null;
-            Curve core = null;
+            
             double _resolution = double.NaN;
             List<Point3d> exitPts = new List<Point3d>();
             double leaseSpan = double.NaN;
@@ -83,7 +83,12 @@ namespace Planbee
             DA.GetData(IN_plane, ref plane);
             bool cMode = DA.GetData(IN_coreMode, ref coreMode);
             DA.GetData(IN_perimCurve, ref perimeter);
-            bool successCore = DA.GetData(IN_coreCurve, ref core);
+
+            //List<int> myStuff = new List<int>();
+            //if (!DA.GetDataList<int>(0, myStuff)) { return; }
+
+            List<Curve> coreCrvs = new List<Curve>();
+            DA.GetDataList(IN_coreCurves, coreCrvs);
             DA.GetData(IN_resolution, ref _resolution);
             bool successLease = DA.GetData(IN_leaseSpan, ref leaseSpan);
 
@@ -95,7 +100,7 @@ namespace Planbee
                     coreMode = 1;
 
                 if (coreMode == 0)
-                    _plan = new SmartPlan(perimeter, core, _resolution, plane);
+                    _plan = new SmartPlan(perimeter, coreCrvs, _resolution, plane);
                 else
                     _plan = new SmartPlan(perimeter, leaseSpan, _resolution, plane);
 
@@ -122,7 +127,7 @@ namespace Planbee
 
                 
                 DA.SetDataList(OUT_cells, _cells);
-                DA.SetData(OUT_core, _plan._coreCurve);
+                DA.SetDataList(OUT_core, _plan._coreCurves);
                 DA.SetData(OUT_perimeter, _plan.perimCurve);
                 DA.SetData(OUT_resolution, _plan._resolution);
             }

@@ -90,7 +90,7 @@ namespace Planbee
             this.perimCurve = perimCurve;
             _coreCurves = new Curve[coreCurves.Count];
             for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = _coreCurves[i];
+                _coreCurves[i] = coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
@@ -109,7 +109,7 @@ namespace Planbee
             this.perimCurve = perimCurve;
             _coreCurves = new Curve[coreCurves.Count];
             for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = _coreCurves[i];
+                _coreCurves[i] = coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
@@ -134,7 +134,7 @@ namespace Planbee
 
             _coreCurves = new Curve[coreCurves.Count];
             for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = _coreCurves[i];
+                _coreCurves[i] = coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -208,7 +208,7 @@ namespace Planbee
             this.perimCurve = perimCurve;
             _coreCurves = new Curve[coreCurves.Count];
             for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = _coreCurves[i];
+                _coreCurves[i] = coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -471,30 +471,32 @@ namespace Planbee
                     }
                     else
                     {
-                        if (InsideCrvsGroup(_plane, _coreCurves) == true)
+                        if (InsideCrvsGroup(samplePt, _plane, _coreCurves) == true)
                             continue;
                         else
                         {
-                            if (_coreCurves.Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                            for (int c = 0; c < _coreCurves.Length; c++)
                             {
-                                var _cell = new SmartCell(loc, this._resolution);
-                                SmartCell cellExisting;
-                                if (cells.TryGetValue(_cell.index, out cellExisting))
-                                    continue;
-                                else
-                                    cells.Add(_cell.index, _cell);
+                                if (_coreCurves[c].Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                                {
+                                    var _cell = new SmartCell(loc, this._resolution);
+                                    SmartCell cellExisting;
+                                    if (cells.TryGetValue(_cell.index, out cellExisting))
+                                        continue;
+                                    else
+                                        cells.Add(_cell.index, _cell);
+                                }
                             }
                         }
                     }
                 }
         }
 
-        public bool InsideCrvsGroup(Plane plane, Curve [] curveArray)
+        public bool InsideCrvsGroup(Point3d point, Plane plane, Curve [] curveArray)
         {
             bool invalid = false;
-            int count = 0;
-            for (int i = 0; i < _coreCurves.Length; i++)
-                if (curveArray[i].Contains(samplePt, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
+            for (int i = 0; i < curveArray.Length; i++)
+                if (curveArray[i].Contains(point, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
                     return true;
             return invalid;
         }
@@ -549,16 +551,25 @@ namespace Planbee
 
         public void ComputeIsovist()
         {
+            Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
             isoPolylines = new Polyline[cells.Count];
 
             interiorPartitionMesh = new Mesh();
+            meshCore = new Mesh();
+            
+            Extrusion[] extrusionCores = new Extrusion[_coreCurves.Length];
+            for (int i = 0; i < _coreCurves.Length; i++)
+            {
+                var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
+                extr.Transform(mov);
+                meshCore.Append(Mesh.CreateFromSurface(extr));
+            }
 
-            var extrCore = Extrusion.CreateExtrusion(_coreCurves, Vector3d.ZAxis); // core extrusion
 
             var curveOff = this.perimCurve.Offset(_plane, -this._resolution/2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
             var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
 
-            Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
+            
 
             for (int i = 0; i < _partCurves.Length; i++)
             {
@@ -568,8 +579,7 @@ namespace Planbee
                 interiorPartitionMesh.Append(meshLocal);
             }
 
-            extrCore.Transform(mov);
-            meshCore = Mesh.CreateFromSurface(extrCore);
+       
             meshOutline = Mesh.CreateFromSurface(extrPerimeter);
             var min = 100000.0;
             var max = -1.0;
@@ -696,7 +706,7 @@ namespace Planbee
             obstacleMeshJoined = new Mesh();
             attractorMeshJoined = new Mesh();
 
-            Mesh[] obstMeshExtrusions = new Mesh[obstCrvs.Length + 1];
+            Mesh[] obstMeshExtrusions = new Mesh[obstCrvs.Length + _coreCurves.Length];
             Mesh[] attrMeshExtrusions = new Mesh[attrCrvs.Length];
 
             Surface srfExtrusion;
@@ -705,8 +715,8 @@ namespace Planbee
 
             for (int i = 0; i < obstMeshExtrusions.Length; i++)
             {
-                if (i == obstCrvs.Length)
-                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves, Vector3d.ZAxis);
+                if (i>obstCrvs.Length)
+                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves[i+obstCrvs.Length], Vector3d.ZAxis);
                 else
                     srfExtrusion = Extrusion.CreateExtrusion(obstCrvs[i], Vector3d.ZAxis);
 

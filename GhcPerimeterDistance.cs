@@ -31,7 +31,7 @@ namespace Planbee
         int IN_plane;
         int IN_AutoColor;
         int IN_perimCurve;
-        int IN_coreCurve;
+        int IN_coreCurves;
         int IN_rects;
 
 
@@ -71,7 +71,7 @@ namespace Planbee
             pManager[2].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurve = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extentds of the core boundary", GH_ParamAccess.item);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extent of the core boundaries", GH_ParamAccess.list);
           
         }
 
@@ -91,7 +91,7 @@ namespace Planbee
         {
 
             Curve perimeter = null;
-            Curve core = null;
+            List<Curve> coreCrvs = new List<Curve>();
             Plane plane = Plane.Unset;
             bool iReset = false;
 
@@ -102,14 +102,14 @@ namespace Planbee
             if (!DA.GetData(IN_plane, ref plane)) return;
             if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
             if (!DA.GetData(IN_perimCurve, ref perimeter)) return;
-            if (!DA.GetData(IN_coreCurve, ref core)) return;
+            if (!DA.GetDataList(IN_coreCurves, coreCrvs)) return;
             if (!DA.GetDataList(IN_rects, rectangles)) return;
 
             try
             {
                 if (_plan == null)
                 {
-                    _plan = new SmartPlan(perimeter, core, rectangles, plane);
+                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
                     _plan.ComputeDistToPerimeter();
                 }
             
@@ -117,7 +117,7 @@ namespace Planbee
                 if (iReset)
                 {
 
-                    _plan = new SmartPlan(perimeter, core, rectangles, plane);
+                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
                     _plan.ComputeDistToPerimeter();
 
                 }
