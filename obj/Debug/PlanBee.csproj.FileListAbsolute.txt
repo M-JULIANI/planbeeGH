@@ -1,9 +1,0 @@
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.csprojAssemblyReference.cache
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.Properties.Resources.resources
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.csproj.GenerateResource.cache
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.csproj.CoreCompileInputs.cache
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\bin\PlanBee.dll
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\bin\PlanBee.pdb
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.dll
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\obj\Debug\PlanBee.pdb
-C:\Users\MJ\PlanBee\PlanBee\PlanBee\bin\PlanBee.dll.config

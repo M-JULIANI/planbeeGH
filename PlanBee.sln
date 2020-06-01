@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanBee", "PlanBee\PlanBee.csproj", "{B7224926-C85A-40E3-BE67-65BC96389524}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanBee", "PlanBee.csproj", "{B7224926-C85A-40E3-BE67-65BC96389524}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {30C4E17F-AE20-4504-9A32-9FE2F9369106}
+		SolutionGuid = {36D413E2-43D0-4E68-BDB1-3BF3DF5A509F}
 	EndGlobalSection
 EndGlobal
