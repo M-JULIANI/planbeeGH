@@ -45,9 +45,10 @@ namespace Planbee
             IN_reset = pManager.AddBooleanParameter("Reset", "Reset", "Reset all vals", GH_ParamAccess.item, false);
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview exit paths", "Autocolor paths", "Path to exit points for each voxel of the flor plan. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
-            pManager[2].Optional = true;
+            pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_partitions = pManager.AddCurveParameter("Partition Curves", "Partitions", "Polylines describing partitions", GH_ParamAccess.list);
+            pManager[IN_partitions].Optional = true;
             IN_exitPts = pManager.AddPointParameter("Exit Points", "Exits", "Points used as exit locations from floor plan", GH_ParamAccess.list);
         }
 
@@ -84,13 +85,17 @@ namespace Planbee
                     if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
                     if (!DA.GetData(IN_plane, ref plane)) return;
                     if (!DA.GetDataList(IN_rects, rectangles)) return;
-                    if (!DA.GetDataList(IN_partitions, interiorPartitions)) return;
+                    DA.GetDataList(IN_partitions, interiorPartitions);
                     if (!DA.GetDataList(IN_exitPts, exitPts)) return;
 
-                    if(iReset)
-                        _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
-                    else if (_plan ==null)
-                        _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+                    if (iReset || _plan == null)
+                    {
+                        if(interiorPartitions.Count == 0 || interiorPartitions == null)
+                            _plan = new SmartPlan(rectangles, exitPts, plane);
+                        else
+                            _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+                    }
+
 
                     Task<SolveResults> task = Task.Run(() => ComputeExit(_plan), CancelToken);
                     TaskList.Add(task);

@@ -76,9 +76,9 @@ namespace Planbee
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
-
         }
-
+ 
+        //exit paths
         public SmartPlan(Curve perimCurve, List<Curve> coreCurves, double _resolution, List<Point3d> ExitPts, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
@@ -231,6 +231,32 @@ namespace Planbee
         //exit access
         //isovist
 
+
+        //simple shortest path
+        public SmartPlan(List<Rectangle3d> rectangles, List<Point3d> exitPoints, Plane plane)
+        {
+            _plane = new Plane(plane.Origin, Vector3d.ZAxis);
+            project = Transform.PlanarProjection(_plane);
+
+            this._resolution = Math.Sqrt(rectangles[0].Area);
+            exitCells = new SmartCell[exitPoints.Count];
+
+            cells = new SortedDictionary<Vector2d, SmartCell>();
+
+            for (int i = 0; i < rectangles.Count; i++)
+            {
+                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var _cell = new SmartCell(loc, this._resolution);
+                SmartCell cellExisting;
+                if (cells.TryGetValue(_cell.index, out cellExisting))
+                    continue;
+                else
+                    cells.Add(_cell.index, _cell);
+            }
+
+            AssignExitCells(exitPoints);
+           // AssignInactiveCells();
+        }
 
         //shortest path constructor
         public SmartPlan(List<Rectangle3d> rectangles, List<Curve> partitions, List<Point3d> exitPoints, Plane plane)
