@@ -12,7 +12,7 @@ namespace Planbee
         public double _resolution;
         public Point3d minPoint;
         public Curve perimCurve;
-        public Curve _coreCurve;
+        public Curve [] _coreCurves;
         public Mesh coreMesh;
         public Point3d[] pts;
         SortedDictionary<Vector2d, SmartCell> cells;
@@ -52,8 +52,8 @@ namespace Planbee
             exitCells = new SmartCell[ExitPts.Count];
 
             this.perimCurve = perimCurve;
-
-            _coreCurve = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
+            _coreCurves = new Curve[1];
+            _coreCurves[0] = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
@@ -71,14 +71,15 @@ namespace Planbee
 
             this.perimCurve = perimCurve;
 
-            _coreCurve = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
+            _coreCurves = new Curve[1];
+            _coreCurves[0] = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
 
         }
 
-        public SmartPlan(Curve perimCurve, Curve coreCurve, double _resolution, List<Point3d> ExitPts, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, double _resolution, List<Point3d> ExitPts, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
@@ -87,7 +88,9 @@ namespace Planbee
             exitCells = new SmartCell[ExitPts.Count];
 
             this.perimCurve = perimCurve;
-            _coreCurve = coreCurve;
+            _coreCurves = new Curve[coreCurves.Count];
+            for (int i = 0; i < _coreCurves.Length; i++)
+                _coreCurves[i] = _coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
@@ -95,7 +98,7 @@ namespace Planbee
         }
 
         //base constructor CorveCurve
-        public SmartPlan(Curve perimCurve, Curve coreCurve, double _resolution, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, double _resolution, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
@@ -104,14 +107,16 @@ namespace Planbee
             exitCells = new SmartCell[0];
 
             this.perimCurve = perimCurve;
-            _coreCurve = coreCurve;
+            _coreCurves = new Curve[coreCurves.Count];
+            for (int i = 0; i < _coreCurves.Length; i++)
+                _coreCurves[i] = _coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
         }
 
         //isovist constructor
-        public SmartPlan(Curve perimCurve, Curve coreCurve, List<Rectangle3d> rectangles, List<Curve> _interiorPartitions, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, List<Curve> _interiorPartitions, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
@@ -126,7 +131,10 @@ namespace Planbee
             }
 
             this.perimCurve = perimCurve;
-            _coreCurve = coreCurve;
+
+            _coreCurves = new Curve[coreCurves.Count];
+            for (int i = 0; i < _coreCurves.Length; i++)
+                _coreCurves[i] = _coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -189,7 +197,7 @@ namespace Planbee
         }
 
         //distance to perimeter constructor
-        public SmartPlan(Curve perimCurve, Curve coreCurve, List<Rectangle3d> rectangles, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
@@ -198,7 +206,9 @@ namespace Planbee
             exitCells = new SmartCell[0];
 
             this.perimCurve = perimCurve;
-            _coreCurve = coreCurve;
+            _coreCurves = new Curve[coreCurves.Count];
+            for (int i = 0; i < _coreCurves.Length; i++)
+                _coreCurves[i] = _coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -260,7 +270,7 @@ namespace Planbee
             AssignInactiveCells();
         }
         //attractor viz constructor
-        public SmartPlan(Curve perimCurve, Curve coreCurve, List<Rectangle3d> rectangles, List<Curve> interiorPartitions, List<Curve> attractorCrvs, List<Curve> obstacleCrvs, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, List<Curve> interiorPartitions, List<Curve> attractorCrvs, List<Curve> obstacleCrvs, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
@@ -287,7 +297,9 @@ namespace Planbee
             }
 
             this.perimCurve = perimCurve;
-            _coreCurve = coreCurve;
+            _coreCurves = new Curve[coreCurves.Count];
+            for (int i = 0; i < _coreCurves.Length; i++)
+                _coreCurves[i] = _coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -459,17 +471,32 @@ namespace Planbee
                     }
                     else
                     {
-                        if (_coreCurve.Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                        if (InsideCrvsGroup(_plane, _coreCurves) == true)
+                            continue;
+                        else
                         {
-                            var _cell = new SmartCell(loc, this._resolution);
-                            SmartCell cellExisting;
-                            if (cells.TryGetValue(_cell.index, out cellExisting))
-                                continue;
-                            else
-                                cells.Add(_cell.index, _cell);
+                            if (_coreCurves.Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                            {
+                                var _cell = new SmartCell(loc, this._resolution);
+                                SmartCell cellExisting;
+                                if (cells.TryGetValue(_cell.index, out cellExisting))
+                                    continue;
+                                else
+                                    cells.Add(_cell.index, _cell);
+                            }
                         }
                     }
                 }
+        }
+
+        public bool InsideCrvsGroup(Plane plane, Curve [] curveArray)
+        {
+            bool invalid = false;
+            int count = 0;
+            for (int i = 0; i < _coreCurves.Length; i++)
+                if (curveArray[i].Contains(samplePt, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
+                    return true;
+            return invalid;
         }
 
         public void ComputeSolarAccess()
@@ -526,7 +553,7 @@ namespace Planbee
 
             interiorPartitionMesh = new Mesh();
 
-            var extrCore = Extrusion.CreateExtrusion(_coreCurve, Vector3d.ZAxis); // core extrusion
+            var extrCore = Extrusion.CreateExtrusion(_coreCurves, Vector3d.ZAxis); // core extrusion
 
             var curveOff = this.perimCurve.Offset(_plane, -this._resolution/2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
             var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
@@ -679,7 +706,7 @@ namespace Planbee
             for (int i = 0; i < obstMeshExtrusions.Length; i++)
             {
                 if (i == obstCrvs.Length)
-                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurve, Vector3d.ZAxis);
+                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves, Vector3d.ZAxis);
                 else
                     srfExtrusion = Extrusion.CreateExtrusion(obstCrvs[i], Vector3d.ZAxis);
 
