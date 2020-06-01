@@ -73,6 +73,7 @@
     <Compile Include="GhcParsePrograms.cs" />
     <Compile Include="GhcPerimeterDistance.cs" />
     <Compile Include="GhcPlanCells.cs" />
+    <Compile Include="GhcSimpleCells.cs" />
     <Compile Include="KMap.cs" />
     <Compile Include="PBSun.cs" />
     <Compile Include="PBUtilities.cs" />
@@ -156,6 +157,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\PlanBee100_75-01-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SimplifiedCells-01.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -85,7 +85,7 @@ namespace Planbee
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve perimeter = null;
-            List<Curve> coreCrvs = null;
+            List<Curve> coreCrvs = new List<Curve>();
             List<Curve> interiorPartitions;
             Plane plane = Plane.Unset;
             bool iReset = false;
