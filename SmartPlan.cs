@@ -97,7 +97,22 @@ namespace Planbee
 
         }
 
-        //base constructor CorveCurve
+        //Single Space Analysis Grid
+        public SmartPlan(Curve perimCurve, double _resolution, Plane plane)
+        {
+            _plane = new Plane(plane.Origin, Vector3d.ZAxis);
+            project = Transform.PlanarProjection(_plane);
+
+            this._resolution = _resolution;
+            exitCells = new SmartCell[0];
+
+            this.perimCurve = perimCurve;
+
+            cells = new SortedDictionary<Vector2d, SmartCell>();
+            PopulateCells();
+        }
+
+        //base constructor CoreCurve
         public SmartPlan(Curve perimCurve, List<Curve> coreCurves, double _resolution, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);

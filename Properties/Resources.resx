@@ -145,6 +145,9 @@
   <data name="Cells" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\Cells.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="CellsSingleVolume_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CellsSingleVolume-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Daylight_Hours_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\Daylight Hours-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -172,13 +175,13 @@
   <data name="PlanBee100_75_01_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\PlanBee100_75-01-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="SimplifiedCells_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SimplifiedCells-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="SOM_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\SOM-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SOM_01_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\SOM-01-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SimplifiedCells_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SimplifiedCells-01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
