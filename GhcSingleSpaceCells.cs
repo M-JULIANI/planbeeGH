@@ -66,7 +66,7 @@ namespace PlanBee
 
             try
             {
-                _plan = new SmartPlan(perimeter, coreCrvs, _resolution, plane);
+                _plan = new SmartPlan(perimeter, _resolution, plane);
                 var _cells = _plan.getCells();
 
                 DA.SetDataList(OUT_cells, _cells);

@@ -512,20 +512,32 @@ namespace Planbee
                     }
                     else
                     {
-                        if (InsideCrvsGroup(samplePt, _plane, _coreCurves) == true)
-                            continue;
+                        if (_coreCurves==null)
+                        {
+                            var _cell = new SmartCell(loc, this._resolution);
+                            SmartCell cellExisting;
+                            if (cells.TryGetValue(_cell.index, out cellExisting))
+                                continue;
+                            else
+                                cells.Add(_cell.index, _cell);
+                        }
                         else
                         {
-                            for (int c = 0; c < _coreCurves.Length; c++)
+                            if (InsideCrvsGroup(samplePt, _plane, _coreCurves) == true)
+                                continue;
+                            else
                             {
-                                if (_coreCurves[c].Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                                for (int c = 0; c < _coreCurves.Length; c++)
                                 {
-                                    var _cell = new SmartCell(loc, this._resolution);
-                                    SmartCell cellExisting;
-                                    if (cells.TryGetValue(_cell.index, out cellExisting))
-                                        continue;
-                                    else
-                                        cells.Add(_cell.index, _cell);
+                                    if (_coreCurves[c].Contains(samplePt, _plane, 0.01) != Rhino.Geometry.PointContainment.Inside)
+                                    {
+                                        var _cell = new SmartCell(loc, this._resolution);
+                                        SmartCell cellExisting;
+                                        if (cells.TryGetValue(_cell.index, out cellExisting))
+                                            continue;
+                                        else
+                                            cells.Add(_cell.index, _cell);
+                                    }
                                 }
                             }
                         }
