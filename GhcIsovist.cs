@@ -78,7 +78,7 @@ namespace Planbee
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             OUT_isovistMetric = pManager.AddNumberParameter("Normalized Isovist metric per voxel", "Normalized isovist", "The isovist metric of each cell, remapped from 0 to 1 using the bounds of the plan as remapping domain", GH_ParamAccess.list);
-            OUT_isovistPolys = pManager.AddCurveParameter("Isovist Polylines", "Iso Polylines", "Isovist polyline polygons describing range of vision from each plan voxel", GH_ParamAccess.list);
+            OUT_isovistPolys = pManager.AddCurveParameter("Isovist Polygonss", "Iso Polygons", "Isovist polyline polygons describing range of vision from each plan voxel", GH_ParamAccess.list);
         }
 
         /// <summary>

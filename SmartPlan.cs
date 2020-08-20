@@ -12,7 +12,7 @@ namespace Planbee
         public double _resolution;
         public Point3d minPoint;
         public Curve perimCurve;
-        public Curve [] _coreCurves;
+        public Curve[] _coreCurves;
         public Mesh coreMesh;
         public Point3d[] pts;
         SortedDictionary<Vector2d, SmartCell> cells;
@@ -38,7 +38,7 @@ namespace Planbee
         Mesh meshCore;
         Mesh meshOutline;
 
-        public Brep [] SolarObstacles;
+        public Brep[] SolarObstacles;
 
         Plane _plane;
         Transform project;
@@ -77,7 +77,7 @@ namespace Planbee
             cells = new SortedDictionary<Vector2d, SmartCell>();
             PopulateCells();
         }
- 
+
         //exit paths
         public SmartPlan(Curve perimCurve, List<Curve> coreCurves, double _resolution, List<Point3d> ExitPts, Plane plane)
         {
@@ -270,7 +270,7 @@ namespace Planbee
             }
 
             AssignExitCells(exitPoints);
-           // AssignInactiveCells();
+            // AssignInactiveCells();
         }
 
         //shortest path constructor
@@ -512,7 +512,7 @@ namespace Planbee
                     }
                     else
                     {
-                        if (_coreCurves==null)
+                        if (_coreCurves == null)
                         {
                             var _cell = new SmartCell(loc, this._resolution);
                             SmartCell cellExisting;
@@ -545,7 +545,7 @@ namespace Planbee
                 }
         }
 
-        public bool InsideCrvsGroup(Point3d point, Plane plane, Curve [] curveArray)
+        public bool InsideCrvsGroup(Point3d point, Plane plane, Curve[] curveArray)
         {
             bool invalid = false;
             for (int i = 0; i < curveArray.Length; i++)
@@ -609,7 +609,7 @@ namespace Planbee
 
             interiorPartitionMesh = new Mesh();
             meshCore = new Mesh();
-            
+
             Extrusion[] extrusionCores = new Extrusion[_coreCurves.Length];
             for (int i = 0; i < _coreCurves.Length; i++)
             {
@@ -619,10 +619,10 @@ namespace Planbee
             }
 
 
-            var curveOff = this.perimCurve.Offset(_plane, -this._resolution/2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
+            var curveOff = this.perimCurve.Offset(_plane, -this._resolution / 2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
             var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
 
-            
+
 
             for (int i = 0; i < _partCurves.Length; i++)
             {
@@ -632,9 +632,9 @@ namespace Planbee
                 interiorPartitionMesh.Append(meshLocal);
             }
 
-       
+
             meshOutline = Mesh.CreateFromSurface(extrPerimeter);
-            var min = 100000.0;
+            var min = 1000000.0;
             var max = -1.0;
 
             int count = 0;
@@ -704,15 +704,30 @@ namespace Planbee
 
                 }
 
-                cell.Value.metric1 = interSum;
-                if (interSum < min)
-                    min = interSum;
-                if (interSum > max)
-                    max = interSum;
+                //cell.Value.metric1 = interSum;
+                //if (interSum < min)
+                //    min = interSum;
+                //if (interSum > max)
+                //    max = interSum;
 
                 poly.Add(memPt);
 
                 isoPolylines[count] = poly;
+
+                var segments = poly.BreakAtAngles(20);
+                var crvs = new List<Curve>();
+                for (int i = 0; i < segments.Length; i++)
+                    crvs.Add(segments[i].ToNurbsCurve());
+
+                var brep = Brep.CreateEdgeSurface(crvs);
+                var area = AreaMassProperties.Compute(brep).Area;
+
+                cell.Value.metric1 = area;
+                if (area < min)
+                    min = area;
+                if (area > max)
+                    max = area;
+
                 count++;
             }
 
@@ -768,8 +783,8 @@ namespace Planbee
 
             for (int i = 0; i < obstMeshExtrusions.Length; i++)
             {
-                if (i>obstCrvs.Length)
-                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves[i+obstCrvs.Length], Vector3d.ZAxis);
+                if (i > obstCrvs.Length)
+                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves[i + obstCrvs.Length], Vector3d.ZAxis);
                 else
                     srfExtrusion = Extrusion.CreateExtrusion(obstCrvs[i], Vector3d.ZAxis);
 
