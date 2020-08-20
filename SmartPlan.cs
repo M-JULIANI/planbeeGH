@@ -704,29 +704,29 @@ namespace Planbee
 
                 }
 
-                //cell.Value.metric1 = interSum;
-                //if (interSum < min)
-                //    min = interSum;
-                //if (interSum > max)
-                //    max = interSum;
+                cell.Value.metric1 = interSum;
+                if (interSum < min)
+                    min = interSum;
+                if (interSum > max)
+                    max = interSum;
 
                 poly.Add(memPt);
 
                 isoPolylines[count] = poly;
 
-                var segments = poly.BreakAtAngles(20);
-                var crvs = new List<Curve>();
-                for (int i = 0; i < segments.Length; i++)
-                    crvs.Add(segments[i].ToNurbsCurve());
+                //var segments = poly.BreakAtAngles(20);
+                //var crvs = new List<Curve>();
+                //for (int i = 0; i < segments.Length; i++)
+                //    crvs.Add(segments[i].ToNurbsCurve());
 
-                var brep = Brep.CreateEdgeSurface(crvs);
-                var area = AreaMassProperties.Compute(brep).Area;
+                //var brep = Brep.CreateEdgeSurface(crvs);
+                //var area = AreaMassProperties.Compute(brep).Area;
 
-                cell.Value.metric1 = area;
-                if (area < min)
-                    min = area;
-                if (area > max)
-                    max = area;
+                //cell.Value.metric1 = area;
+                //if (area < min)
+                //    min = area;
+                //if (area > max)
+                //    max = area;
 
                 count++;
             }
