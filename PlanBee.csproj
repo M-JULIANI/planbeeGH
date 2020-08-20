@@ -75,6 +75,7 @@
     <Compile Include="GhcPlanCells.cs" />
     <Compile Include="GhcSimpleCells.cs" />
     <Compile Include="GhcSingleSpaceCells.cs" />
+    <Compile Include="Ghc_MeanShortestPaths.cs" />
     <Compile Include="KMap.cs" />
     <Compile Include="PBSun.cs" />
     <Compile Include="PBUtilities.cs" />
@@ -164,6 +165,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\CellsSingleVolume-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\MeanShortestPath-01.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
