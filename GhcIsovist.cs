@@ -29,7 +29,7 @@ namespace Planbee
     {
         bool autoColor = false;
         SmartPlan _plan;
-        List<Rectangle3d> rectangles = new List<Rectangle3d>();
+        List<Rectangle3d> rectangles;
         System.Drawing.Color[] gradientList;
         double[] iso;
 
@@ -89,6 +89,7 @@ namespace Planbee
             List<Curve> interiorPartitions;
             Plane plane = Plane.Unset;
             bool iReset = false;
+            rectangles = new List<Rectangle3d>();
 
 
             try
@@ -106,9 +107,9 @@ namespace Planbee
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    if (iReset)
-                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
-                    else if (_plan == null)
+                    //if (iReset)
+                    //    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    //else if (_plan == null)
                         _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
 
 
