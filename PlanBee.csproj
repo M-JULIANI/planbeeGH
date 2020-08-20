@@ -174,8 +174,13 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>Copy "$(TargetPath)" "C:\Users\MJ\AppData\Roaming\Grasshopper\Libraries\PlanBee.gha"
-Erase "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
+Copy "$(TargetPath)" "$(SolutionDir)$(ProjectName).gha"
+Copy "$(TargetPath)" "C:\Users\MJ\AppData\Roaming\Grasshopper\Libraries\PlanBee.gha"
+Erase "$(TargetPath)"
+
+
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
