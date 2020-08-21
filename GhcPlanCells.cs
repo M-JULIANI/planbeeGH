@@ -115,7 +115,7 @@ namespace Planbee
                 {
                     diff = (int)Math.Round(totalArea - calcArea);
                     message = String.Format("Plan areas don't meet those specified in the .csv by {0}, either reduce required areas or make plan footprint larger", diff);
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, message);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
                     DA.SetData(OUT_areaFeedback, message);
                 }
                 else

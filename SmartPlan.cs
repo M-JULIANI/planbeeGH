@@ -26,6 +26,7 @@ namespace Planbee
         public SmartCell[] exitCells;
         public DataTree<Polyline> pathCurves;
         public Polyline[] isoPolylines;
+        public Polyline[] isoNeighPolylines;
         public Vector3d[] isovistDirections;
         Curve[] _partCurves;
 
@@ -443,6 +444,29 @@ namespace Planbee
             return att;
         }
 
+        public double[] getNeighborhoodSizeRaw()
+        {
+            var att = new double[cells.Count];
+            int count = 0;
+            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            {
+                att[count] = _cell.Value.neighSizeRaw;
+                count++;
+            }
+            return att;
+        }
+        public double[] getNeighborhoodSize()
+        {
+            var att = new double[cells.Count];
+            int count = 0;
+            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            {
+                att[count] = _cell.Value.neighSize;
+                count++;
+            }
+            return att;
+        }
+
         public double[] getMSPRaw()
         {
             var att = new double[cells.Count];
@@ -663,10 +687,11 @@ namespace Planbee
             }
         }
 
-        public void ComputeIsovist()
+
+        public void ComputeNeighSize()
         {
             Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
-            isoPolylines = new Polyline[cells.Count];
+            isoNeighPolylines = new Polyline[cells.Count];
 
             interiorPartitionMesh = new Mesh();
             meshCore = new Mesh();
@@ -704,7 +729,7 @@ namespace Planbee
             {
                 var interSum = 0.0;
                 Polyline poly = new Polyline();
-                Point3d memPt = new Point3d(0, 0, 0);
+                Point3d memPt = Point3d.Unset;
                 Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
 
                 if (this.perimCurve.Contains(dummyPt, _plane, 0.00001) == Rhino.Geometry.PointContainment.Outside)
@@ -762,7 +787,131 @@ namespace Planbee
                         if (i == 0)
                             memPt = new Point3d(best.X, best.Y, best.Z);
                     }
+                }
 
+                poly.Add(memPt);
+                isoNeighPolylines[count] = poly;
+                double area;
+                Mesh mesh;
+                if (poly.IsClosed)
+                {
+                    mesh = Mesh.CreateFromClosedPolyline(poly);
+                    area = AreaMassProperties.Compute(mesh).Area;
+                }
+                else
+                    area = 0.0;
+
+                cell.Value.neighSizeRaw = area;
+
+                if (area < min)
+                    min = area;
+                if (area > max)
+                    max = area;
+
+                count++;
+            }
+
+            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            {
+                var holder = PBUtilities.mapValue(cell.Value.neighSizeRaw, min, max, 0.00, 1.00);
+                cell.Value.neighSize = holder;
+            }
+
+        }
+        public void ComputeIsovist()
+        {
+            Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
+            isoPolylines = new Polyline[cells.Count];
+
+            interiorPartitionMesh = new Mesh();
+            meshCore = new Mesh();
+
+            Extrusion[] extrusionCores = new Extrusion[_coreCurves.Length];
+            for (int i = 0; i < _coreCurves.Length; i++)
+            {
+                var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
+                extr.Transform(mov);
+                meshCore.Append(Mesh.CreateFromSurface(extr));
+            }
+
+            var curveOff = this.perimCurve.Offset(_plane, -this._resolution / 2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
+            var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
+
+            for (int i = 0; i < _partCurves.Length; i++)
+            {
+                var extrLocal = Extrusion.CreateExtrusion(_partCurves[i], Vector3d.ZAxis);
+                extrLocal.Transform(mov);
+                var meshLocal = Mesh.CreateFromSurface(extrLocal);
+                interiorPartitionMesh.Append(meshLocal);
+            }
+
+            meshOutline = Mesh.CreateFromSurface(extrPerimeter);
+            var min = 1000000.0;
+            var max = -1.0;
+
+            int count = 0;
+
+            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            {
+                var interSum = 0.0;
+                Polyline poly = new Polyline();
+                Point3d memPt = Point3d.Unset;
+                Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
+
+                if (this.perimCurve.Contains(dummyPt, _plane, 0.00001) == Rhino.Geometry.PointContainment.Outside)
+                {
+                    double t;
+                    if (curveOff[0].ClosestPoint(dummyPt, out t))
+                        dummyPt = curveOff[0].PointAt(t);
+                }
+
+                bool addPt;
+                Ray3d ray;
+                Point3d pt;
+                double partialLength;
+
+                for (int i = 0; i < isovistDirections.Length; i++)
+                {
+                    addPt = false;
+                    ray = new Ray3d(dummyPt, isovistDirections[i]);
+                    pt = Point3d.Unset;
+
+                    var pointforComp = new List<Point3d>();
+
+                    if (Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray) > 0.0)
+                    {
+                        pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray));
+                        addPt = true;
+                        pointforComp.Add(pt);
+
+                    }
+                    if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray) > 0.0)
+                    {
+                        pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray));
+                        addPt = true;
+                        pointforComp.Add(pt);
+                    }
+
+                    if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray) > 0.0)
+                    {
+                        pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray));
+                        addPt = true;
+                        pointforComp.Add(pt);
+                    }
+
+                    else addPt = false;
+
+                    Point3d best;
+                    if (addPt)
+                    {
+                        best = pointforComp.OrderBy(p => p.DistanceTo(dummyPt)).ToList()[0];
+                        partialLength = best.DistanceTo(dummyPt);
+                        interSum += partialLength;
+                        poly.Add(best);
+
+                        if (i == 0)
+                            memPt = new Point3d(best.X, best.Y, best.Z);
+                    }
                 }
 
                 cell.Value.metric1 = interSum;
@@ -772,23 +921,7 @@ namespace Planbee
                     max = interSum;
 
                 poly.Add(memPt);
-
                 isoPolylines[count] = poly;
-
-                //var segments = poly.BreakAtAngles(20);
-                //var crvs = new List<Curve>();
-                //for (int i = 0; i < segments.Length; i++)
-                //    crvs.Add(segments[i].ToNurbsCurve());
-
-                //var brep = Brep.CreateEdgeSurface(crvs);
-                //var area = AreaMassProperties.Compute(brep).Area;
-
-                //cell.Value.metric1 = area;
-                //if (area < min)
-                //    min = area;
-                //if (area > max)
-                //    max = area;
-
                 count++;
             }
 

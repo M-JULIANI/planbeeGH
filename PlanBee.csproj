@@ -70,6 +70,7 @@
     <Compile Include="GhcExitAccess.cs" />
     <Compile Include="GhcIsovist.cs" />
     <Compile Include="GhcKohonenMap.cs" />
+    <Compile Include="GhcNeighborhoodSize.cs" />
     <Compile Include="GhcParsePrograms.cs" />
     <Compile Include="GhcPerimeterDistance.cs" />
     <Compile Include="GhcPlanCells.cs" />
@@ -169,6 +170,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\MeanShortestPath-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\NeighborhoodSize-01.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

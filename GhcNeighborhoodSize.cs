@@ -21,41 +21,40 @@ using Rhino.Collections;
 using GH_IO;
 using GH_IO.Serialization;
 using System.Threading.Tasks;
+using Planbee;
 
-
-namespace Planbee
+namespace PlanBee
 {
-    public class GhcIsovist : GH_TaskCapableComponent<GhcIsovist.SolveResults>
+    public class GhcNeighborhoodSize : GH_TaskCapableComponent<GhcNeighborhoodSize.SolveResults>
     {
+
         bool autoColor = false;
-        //bool reset_Active = true;
         SmartPlan _plan;
         List<Rectangle3d> rectangles = new List<Rectangle3d>();
         System.Drawing.Color[] gradientList;
-        double[] iso;
-
-        GH_Document doc;
+        double[] rawNeighSize;
+        double[] neighSize;
 
         /// <summary>
-        /// Initializes a new instance of the GhcIsovist class.
+        /// Initializes a new instance of the GhcNeighborhoodSize class.
         /// </summary>
-        public GhcIsovist()
-          : base("Isovist", "Isovist",
-              "Computes an isovist metric for each plan voxel",
+        public GhcNeighborhoodSize()
+          : base("Neighborhood Size", "Neighborhood Size",
+              "Neighborhood size equivalent to the area of the isovist polygon",
               "PlanBee", "Analysis")
         {
         }
 
-        //int IN_reset;
         int IN_AutoColor;
         int IN_plane;
         int IN_perimCurve;
         int IN_coreCurves;
         int IN_rects;
         int IN_partitions;
-        int OUT_isovistMetric;
-        int OUT_isovistPolys;
 
+        int OUT_neighSizeMetric;
+        int OUT_rawNeighSizeMetric;
+        int OUT_isovistPolys;
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -76,7 +75,8 @@ namespace Planbee
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            OUT_isovistMetric = pManager.AddNumberParameter("Normalized Isovist metric per voxel", "Normalized isovist", "The isovist metric of each cell, remapped from 0 to 1 using the bounds of the plan as remapping domain", GH_ParamAccess.list);
+            OUT_neighSizeMetric = pManager.AddNumberParameter("Normalized Neighborhood Size metric per voxel", "Normalized Neighborhood Size", "The neighborhood size metric of each cell, remapped from 0 to 1 using the bounds of the plan as remapping domain", GH_ParamAccess.list);
+            OUT_rawNeighSizeMetric = pManager.AddNumberParameter("Raw Neighborhood Size metric per voxel", "Raw Neighborhood Size", "The raw neighborhood size metric of each cell", GH_ParamAccess.list);
             OUT_isovistPolys = pManager.AddCurveParameter("Isovist Polygons", "Iso Polygons", "Isovist polyline polygons describing range of vision from each plan voxel", GH_ParamAccess.list);
         }
 
@@ -98,7 +98,7 @@ namespace Planbee
                     rectangles = new List<Rectangle3d>();
                     interiorPartitions = new List<Curve>();
 
-                   // DA.GetData(IN_reset, ref iReset);
+                    // DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
@@ -109,7 +109,7 @@ namespace Planbee
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
 
 
-                    Task<SolveResults> task = Task.Run(() => ComputeIso(_plan), CancelToken);
+                    Task<SolveResults> task = Task.Run(() => ComputeNeighborhoodSize(_plan), CancelToken);
                     TaskList.Add(task);
                     return;
                 }
@@ -127,26 +127,24 @@ namespace Planbee
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
-                    result = ComputeIso(_plan);
+                    result = ComputeNeighborhoodSize(_plan);
                     _plan = result.Value;
 
                 }
 
                 if (result != null)
                 {
-                    iso = _plan.getIsovist();
-                    DA.SetDataList(OUT_isovistMetric, iso);
-                    DA.SetDataList(OUT_isovistPolys, _plan.isoPolylines);
+                    rawNeighSize = _plan.getNeighborhoodSizeRaw();
+                    neighSize = _plan.getNeighborhoodSize();
+                    DA.SetDataList(OUT_neighSizeMetric, neighSize);
+                    DA.SetDataList(OUT_rawNeighSizeMetric, rawNeighSize);
+                    DA.SetDataList(OUT_isovistPolys, _plan.isoNeighPolylines);
                 }
             }
             catch (Exception e)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.ToString());
             }
-
-           // Params.ParameterChanged -= ObjectEventHandler;
-           // Params.ParameterChanged += ObjectEventHandler;
-
         }
 
         public class SolveResults
@@ -154,21 +152,27 @@ namespace Planbee
             public SmartPlan Value { get; set; }
         }
 
-        public static SolveResults ComputeIso(SmartPlan plan)
+        public static SolveResults ComputeNeighborhoodSize(SmartPlan plan)
         {
             SolveResults result = new SolveResults();
-            plan.ComputeIsovist();
+            plan.ComputeNeighSize();
             result.Value = plan;
             return result;
         }
 
+        /// <summary>
+        /// Provides an Icon for the component.
+        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                return PlanBee.Properties.Resources.Isovist_01;
+                //You can add image files to your project resources and access them like this:
+                // return Resources.IconForThisComponent;
+                return Properties.Resources.NeighborhoodSize_01;
             }
         }
+
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
@@ -178,7 +182,7 @@ namespace Planbee
                 gradientList = new System.Drawing.Color[_plan.getCells().Count];
                 for (int i = 0; i < gradientList.Length; i++)
                 {
-                    var multiplier = iso[i];
+                    var multiplier = neighSize[i];
 
                     var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
                     var rgb = gColor.ToArgbColor();
@@ -208,7 +212,7 @@ namespace Planbee
 
                 for (int i = 0; i < gradientList.Length; i++)
                 {
-                    var multiplier = iso[i];
+                    var multiplier = neighSize[i];
 
                     var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
                     var rgb = gColor.ToArgbColor();
@@ -235,18 +239,7 @@ namespace Planbee
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("a3eaedb0-7217-4034-b936-d39427de8772"); }
-        }
-
-        void ObjectEventHandler(object sender, EventArgs e)
-        {
-                //if (e.Objects.Where(o => o is IGH_ActiveObject).Count() > 0)
-                {
-                   // reset_Active = true;
-                    // lastChecked = DateTime.Now;
-                    this.ExpireSolution(true);
-                }
-
+            get { return new Guid("2956704c-0f2b-4e1f-b3f6-c47e98d64eac"); }
         }
     }
 }
