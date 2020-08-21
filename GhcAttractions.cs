@@ -28,7 +28,6 @@ namespace Planbee
         {
         }
 
-        int IN_reset;
         int IN_AutoColor;
         int IN_plane;
         int IN_perimCurve;
@@ -48,10 +47,9 @@ namespace Planbee
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            IN_reset = pManager.AddBooleanParameter("Reset", "Reset", "Reset all vals", GH_ParamAccess.item, false);
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview Attraction Metric Visualization", "Autocolor Attraction", "A build it analysis coloring of the voxels of the plan for the attraction metric. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
-            pManager[2].Optional = true;
+            pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describes the extent of the core boundaries", GH_ParamAccess.list);
@@ -77,11 +75,10 @@ namespace Planbee
         {
             Curve perimeter = null;
             List<Curve> coreCrvs = new List<Curve>();
-            List<Curve> interiorPartitions = new List<Curve>();
-            List<Curve> attractors = new List<Curve>();
-            List<Curve> obstacles = new List<Curve>();
+            List<Curve> interiorPartitions;
+            List<Curve> attractors;
+            List<Curve> obstacles;
             Plane plane = Plane.Unset;
-            bool iReset = false;
 
             try
             {
@@ -92,7 +89,6 @@ namespace Planbee
                     attractors = new List<Curve>();
                     obstacles = new List<Curve>();
 
-                    DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
@@ -102,11 +98,8 @@ namespace Planbee
 
                     DA.GetDataList(IN_attCrvs, attractors);
                     DA.GetDataList(IN_obstCrvs, obstacles);
-
-                    if(iReset)
-                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
-                    else if (_plan == null)
-                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
+               
+                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, attractors, obstacles, plane);
 
                     Task<SolveResults> task = Task.Run(() => ComputeAttractions(_plan), CancelToken);
                     TaskList.Add(task);
@@ -120,7 +113,6 @@ namespace Planbee
                     attractors = new List<Curve>();
                     obstacles = new List<Curve>();
 
-                    DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);

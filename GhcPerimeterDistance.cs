@@ -37,42 +37,18 @@ namespace Planbee
 
         int OUT_perimeterMetric;
 
-        //void m_SolutionExpired(IGH_DocumentObject sender, GH_SolutionExpiredEventArgs e)
-        //{
-        //    // Checking if the sender is welcome in our house ;)
-        //    // meaning: not connected to the input parameter
-        //    _change = false;
-
-        //    for (int i = 0; i < 5; i++)
-        //    {
-        //        if (this.Params.Input[i].Sources[0].Equals(sender) != true)
-        //        {
-        //            _change = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if (_change)
-        //    {
-        //        // unregistering from this floating slider
-        //        sender.SolutionExpired -= m_SolutionExpired;
-        //        return;
-        //    }
-
-        //}
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            IN_reset = pManager.AddBooleanParameter("Reset", "Reset", "Reset all vals", GH_ParamAccess.item, false);
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview Perimeter Metric Visualization", "Autocolor Perimeter", "A build it analysis coloring of the voxels of the plan for the perimeter metric. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item);
-            pManager[2].Optional = true;
+            pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extent of the core boundaries", GH_ParamAccess.list);
-          
+
         }
 
         /// <summary>
@@ -93,10 +69,7 @@ namespace Planbee
             Curve perimeter = null;
             List<Curve> coreCrvs = new List<Curve>();
             Plane plane = Plane.Unset;
-            bool iReset = false;
 
-
-            DA.GetData(IN_reset, ref iReset);
             rectangles = new List<Rectangle3d>();
 
             if (!DA.GetData(IN_plane, ref plane)) return;
@@ -107,20 +80,8 @@ namespace Planbee
 
             try
             {
-                if (_plan == null)
-                {
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
-                    _plan.ComputeDistToPerimeter();
-                }
-            
-
-                if (iReset)
-                {
-
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
-                    _plan.ComputeDistToPerimeter();
-
-                }
+                _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
+                _plan.ComputeDistToPerimeter();
 
                 perimeterDist = _plan.getPerimDistances();
 

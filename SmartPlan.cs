@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
+
 namespace Planbee
 {
     public class SmartPlan
@@ -377,7 +379,7 @@ namespace Planbee
             this.perimCurve = perimCurve;
             _coreCurves = new Curve[coreCurves.Count];
             for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = _coreCurves[i];
+                _coreCurves[i] = coreCurves[i];
 
             cells = new SortedDictionary<Vector2d, SmartCell>();
 
@@ -401,9 +403,6 @@ namespace Planbee
                 var vec = new Vector3d(Math.Sin(modSin), Math.Cos(modSin), 0);
                 isovistDirections[i] = vec;
             }
-
-            testLines = new DataTree<Line>();
-
         }
 
         public List<Rectangle3d> getCells()
@@ -965,83 +964,94 @@ namespace Planbee
 
         public void ComputeAttractionViz()
         {
-            obstacleMeshJoined = new Mesh();
-            attractorMeshJoined = new Mesh();
 
-            Mesh[] obstMeshExtrusions = new Mesh[obstCrvs.Length + _coreCurves.Length];
-            Mesh[] attrMeshExtrusions = new Mesh[attrCrvs.Length];
-
-            Surface srfExtrusion;
-
-            Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
-
-            for (int i = 0; i < obstMeshExtrusions.Length; i++)
+            try
             {
-                if (i > obstCrvs.Length)
-                    srfExtrusion = Extrusion.CreateExtrusion(_coreCurves[i + obstCrvs.Length], Vector3d.ZAxis);
-                else
-                    srfExtrusion = Extrusion.CreateExtrusion(obstCrvs[i], Vector3d.ZAxis);
+                obstacleMeshJoined = new Mesh();
+                attractorMeshJoined = new Mesh();
 
-                srfExtrusion.Transform(mov);
-                obstMeshExtrusions[i] = Mesh.CreateFromSurface(srfExtrusion);
-                obstacleMeshJoined.Append(obstMeshExtrusions[i]);
-            }
+                testLines = new DataTree<Line>();
 
-            for (int i = 0; i < attrMeshExtrusions.Length; i++)
-            {
-                srfExtrusion = Extrusion.CreateExtrusion(attrCrvs[i], Vector3d.ZAxis);
-                srfExtrusion.Transform(mov);
-                attrMeshExtrusions[i] = Mesh.CreateFromSurface(srfExtrusion);
-                attractorMeshJoined.Append(attrMeshExtrusions[i]);
-            }
+                Mesh[] obstMeshExtrusions = new Mesh[obstCrvs.Length + _coreCurves.Length];
+                Mesh[] attrMeshExtrusions = new Mesh[attrCrvs.Length];
 
-            var min = 1000.0;
-            var max = 1.0;
-            int count = 0;
+                Surface srfExtrusion;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
-            {
-                Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
-                Vector3d dDir;
-                Ray3d ray;
-                Ray3d rayUseful;
+                Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
 
-                int hits = 0;
-                double dist = 0.0;
-
-                for (int i = 0; i < isovistDirections.Length; i++)
+                //funky logic beware!
+                for (int i = 0; i < obstMeshExtrusions.Length; i++)
                 {
-                    dDir = isovistDirections[i];
-                    ray = new Ray3d(dummyPt, dDir);
-                    rayUseful = new Ray3d(dummyPt, dDir);
+                    if (i >= obstCrvs.Length)
+                        srfExtrusion = Extrusion.CreateExtrusion(_coreCurves[i - obstCrvs.Length], Vector3d.ZAxis);
+                    else
+                        srfExtrusion = Extrusion.CreateExtrusion(obstCrvs[i], Vector3d.ZAxis);
 
+                    srfExtrusion.Transform(mov);
+                    obstMeshExtrusions[i] = Mesh.CreateFromSurface(srfExtrusion);
+                    obstacleMeshJoined.Append(obstMeshExtrusions[i]);
+                }
 
-                    if (Rhino.Geometry.Intersect.Intersection.MeshRay(obstacleMeshJoined, ray) < 0.0)
+                for (int i = 0; i < attrMeshExtrusions.Length; i++)
+                {
+                    srfExtrusion = Extrusion.CreateExtrusion(attrCrvs[i], Vector3d.ZAxis);
+                    srfExtrusion.Transform(mov);
+                    attrMeshExtrusions[i] = Mesh.CreateFromSurface(srfExtrusion);
+                    attractorMeshJoined.Append(attrMeshExtrusions[i]);
+                }
+
+                var min = 100000.0;
+                var max = -1.0;
+                int count = 0;
+
+                foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+                {
+                    Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
+                    Vector3d dDir;
+                    Ray3d ray;
+                    Ray3d rayUseful;
+
+                    int hits = 0;
+                    double dist = 0.0;
+
+                    for (int i = 0; i < isovistDirections.Length; i++)
                     {
-                        var usefulRayT = Rhino.Geometry.Intersect.Intersection.MeshRay(attractorMeshJoined, rayUseful);
-                        if (usefulRayT > 0.0)
+                        dDir = isovistDirections[i];
+                        ray = new Ray3d(dummyPt, dDir);
+                        rayUseful = new Ray3d(dummyPt, dDir);
+
+
+                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(obstacleMeshJoined, ray) < 0.0)
                         {
-                            var usefulPt = rayUseful.PointAt(usefulRayT);
-                            var tempDist = usefulPt.DistanceTo(dummyPt);
-                            dist += tempDist;
-                            hits++;
-                            testLines.Add(new Line(usefulPt, dummyPt), new GH_Path(count));
+                            var usefulRayT = Rhino.Geometry.Intersect.Intersection.MeshRay(attractorMeshJoined, rayUseful);
+                            if (usefulRayT > 0.0)
+                            {
+                                var usefulPt = rayUseful.PointAt(usefulRayT);
+                                var tempDist = usefulPt.DistanceTo(dummyPt);
+                                dist += tempDist;
+                                hits++;
+                                testLines.Add(new Line(usefulPt, dummyPt), new GH_Path(count));
+                            }
                         }
                     }
+                    cell.Value.metric3 = dist;
+                    if (dist < min)
+                        min = dist;
+                    if (dist > max)
+                        max = dist;
+
+                    count++;
                 }
-                cell.Value.metric3 = dist;
-                if (dist < min)
-                    min = dist;
-                if (dist > max)
-                    max = dist;
 
-                count++;
+                foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+                {
+                    var holder = PBUtilities.mapValue(cell.Value.metric3, min, max, 0.00, 1.00);
+                    cell.Value.metric3 = holder;
+                }
             }
-
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            catch (Exception e)
             {
-                var holder = PBUtilities.mapValue(cell.Value.metric3, min, max, 0.00, 1.00);
-                cell.Value.metric3 = holder;
+                e.ToString();
             }
         }
 
@@ -1110,7 +1120,14 @@ namespace Planbee
             {
                 double distance = 0.0;
                 int count = 0;
-                for (int j = 0; j < cells2.Count; j++)
+
+
+               // foreach (var batch in cells2.Batch(cells1.Count))
+                //{
+                //    int j = 0;
+               // }
+
+                   for (int j = 0; j < cells2.Count; j++)
                 {
                     if (i == j) continue;
                     else
@@ -1133,6 +1150,7 @@ namespace Planbee
                         }
                         count++;
                     }
+                    j++;
                 }
                 cells1[i].Value.metric5 = distance / count;
                 cells1[i].Value.mspRaw = distance / count;
