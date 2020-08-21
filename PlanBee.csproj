@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="SmartCell.cs" />
     <Compile Include="SmartPlan.cs" />
+    <Compile Include="Testingcs.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

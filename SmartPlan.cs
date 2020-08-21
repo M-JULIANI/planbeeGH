@@ -967,9 +967,8 @@ namespace Planbee
 
             var min = 100000000.0;
             var max = -1.0;
-            int count = 0;
             Polyline localPath;
-            int countOut = 0;
+            int countOut = 0; //data tree paths, +=1 per cell
 
             var cells1 = cells.ToList();
             var cells2 = cells.ToList();
@@ -977,6 +976,7 @@ namespace Planbee
             for (int i = 0; i < cells1.Count; i++)
             {
                 double distance = 0.0;
+                int count = 0;
                 for (int j = 0; j < cells2.Count; j++)
                 {
                     if (i == j) continue;
@@ -998,12 +998,11 @@ namespace Planbee
                             if (k == steps.Count - 1)
                                 pathCurves.Add(localPath, new GH_Path(countOut));
                         }
-
                         count++;
                     }
                 }
-                cells1[i].Value.metric5 = distance;
-                cells1[i].Value.mspRaw = distance;
+                cells1[i].Value.metric5 = distance / count;
+                cells1[i].Value.mspRaw = distance / count;
                 countOut++;
             }
 
