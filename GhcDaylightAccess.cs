@@ -27,7 +27,6 @@ namespace Planbee
         {
         }
 
-        int IN_reset;
         int IN_AutoColor;
         int IN_plane;
         int IN_vectors;
@@ -47,10 +46,9 @@ namespace Planbee
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            IN_reset = pManager.AddBooleanParameter("Reset", "Reset", "Reset all vals", GH_ParamAccess.item, false);
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview Daylight Access Metric Visualization", "Autocolor Daylight", "A built-in analysis coloring of the voxels of the plan for the daylight access metric. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
-            pManager[2].Optional = true;
+            pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_vectors = pManager.AddVectorParameter("Sun Vectors", "Sun Vectors", "The sun vectors pertaining to spcified analysis period", GH_ParamAccess.list);
@@ -82,7 +80,6 @@ namespace Planbee
             List<Vector3d> SunVectors = new List<Vector3d>();
             List<Curve> partitionCurves = new List<Curve>();
             Plane plane = Plane.Unset;
-            bool iReset = false;
             double floorToCeiling = double.NaN;
 
             Brep extrBrep = new Brep();
@@ -97,7 +94,6 @@ namespace Planbee
                     SunVectors = new List<Vector3d>();
                     partitionCurves = new List<Curve>();
 
-                    DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetDataList(IN_vectors, SunVectors);
@@ -115,7 +111,7 @@ namespace Planbee
 
                     perimeter.Transform(project);
 
-                   Vector3d extrusionVec = new Vector3d(0, 0, 1) * floorToCeiling;
+                    Vector3d extrusionVec = new Vector3d(0, 0, 1) * floorToCeiling;
                     for (int i = 0; i < partitionCurves.Count; i++)
                     {
                         var extr = Surface.CreateExtrusion(partitionCurves[i], extrusionVec);
@@ -125,12 +121,10 @@ namespace Planbee
                     perimeter.Translate(extrusionVec);
 
                     extrBrep = Rhino.Geometry.Brep.CreatePlanarBreps(perimeter, 0.0001)[0];
-                    ACTUAL_obstacles.Add(extrBrep); 
+                    ACTUAL_obstacles.Add(extrBrep);
 
-                    if (iReset)
-                        _plan = new SmartPlan(rectangles, SunVectors, ACTUAL_obstacles, plane);
-                    else if (_plan == null)
-                        _plan = new SmartPlan(rectangles, SunVectors, ACTUAL_obstacles, plane);
+
+                    _plan = new SmartPlan(rectangles, SunVectors, ACTUAL_obstacles, plane);
 
                     Task<SolveResults> task = Task.Run(() => ComputeSolar(_plan), CancelToken);
                     TaskList.Add(task);
@@ -138,14 +132,12 @@ namespace Planbee
                 }
                 if (!GetSolveResults(DA, out SolveResults result))
                 {
-                    //perimeter = null;
                     rectangles = new List<Rectangle3d>();
                     ACTUAL_obstacles = new List<Brep>();
                     _obstacles = new List<Brep>();
                     SunVectors = new List<Vector3d>();
                     partitionCurves = new List<Curve>();
 
-                    DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetDataList(IN_vectors, SunVectors);
@@ -174,7 +166,7 @@ namespace Planbee
                     perimeter.Translate(extrusionVec);
 
                     extrBrep = Rhino.Geometry.Brep.CreatePlanarBreps(perimeter, 0.0001)[0];
-                    ACTUAL_obstacles.Add(extrBrep); 
+                    ACTUAL_obstacles.Add(extrBrep);
 
                     _plan = new SmartPlan(rectangles, SunVectors, ACTUAL_obstacles, plane);
                     result = ComputeSolar(_plan);

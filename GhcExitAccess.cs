@@ -28,7 +28,6 @@ namespace Planbee
         {
         }
 
-        int IN_reset;
         int IN_AutoColor;
         int IN_plane;
         int IN_rects;
@@ -43,7 +42,6 @@ namespace Planbee
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            IN_reset = pManager.AddBooleanParameter("Reset", "Reset", "Reset all vals", GH_ParamAccess.item, false);
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview exit paths", "Autocolor paths", "Path to exit points for each voxel of the flor plan. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
             pManager[IN_plane].Optional = true;
@@ -68,11 +66,10 @@ namespace Planbee
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            
+
             List<Curve> interiorPartitions = new List<Curve>();
             List<Point3d> exitPts = new List<Point3d>();
             Plane plane = Plane.Unset;
-            bool iReset = false;
 
             try
             {
@@ -81,21 +78,17 @@ namespace Planbee
                     rectangles = new List<Rectangle3d>();
                     interiorPartitions = new List<Curve>();
 
-
-                    DA.GetData(IN_reset, ref iReset);
                     if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
                     if (!DA.GetData(IN_plane, ref plane)) return;
                     if (!DA.GetDataList(IN_rects, rectangles)) return;
                     DA.GetDataList(IN_partitions, interiorPartitions);
                     if (!DA.GetDataList(IN_exitPts, exitPts)) return;
 
-                    if (iReset || _plan == null)
-                    {
-                        if(interiorPartitions.Count == 0 || interiorPartitions == null)
-                            _plan = new SmartPlan(rectangles, exitPts, plane);
-                        else
-                            _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
-                    }
+                    if (interiorPartitions.Count == 0 || interiorPartitions == null)
+                        _plan = new SmartPlan(rectangles, exitPts, plane);
+                    else
+                        _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+
 
 
                     Task<SolveResults> task = Task.Run(() => ComputeExit(_plan), CancelToken);
@@ -108,7 +101,6 @@ namespace Planbee
                     rectangles = new List<Rectangle3d>();
                     interiorPartitions = new List<Curve>();
 
-                    DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetDataList(IN_rects, rectangles);
