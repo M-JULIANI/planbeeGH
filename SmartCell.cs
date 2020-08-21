@@ -31,6 +31,8 @@ namespace Planbee
         public double metric2; // distance to perimeter curve/ daylight
         public double metric3; //distance to attractions
         public double metric4; //distance to closest exit
+        public double metric5; // meanshortestpath
+        public double mspRaw; // meanshortestpath
         public double tempMetric;
         public Vector2d location;
         public Vector2d index;
@@ -65,6 +67,7 @@ namespace Planbee
             this.metric3 = metric3;
             this.metric4 = metric4;
             this.tempMetric = 0.0;
+            this.mspRaw = 0.0;
             Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
@@ -88,6 +91,8 @@ namespace Planbee
             this.metric2 = 0.0;
             this.metric3 = 0.0;
             this.metric4 = 0.0;
+            this.metric5 = 0.0;
+            this.mspRaw = 0.0;
             this.tempMetric = 0.0;
             Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
