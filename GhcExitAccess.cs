@@ -112,7 +112,6 @@ namespace Planbee
                     _plan = result.Value;
                 }
 
-
                 if (result != null)
                 {
                     _exitMetric = _plan.getExitMetric();

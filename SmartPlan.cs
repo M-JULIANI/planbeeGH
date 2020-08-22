@@ -17,7 +17,7 @@ namespace Planbee
         public Curve[] _coreCurves;
         public Mesh coreMesh;
         public Point3d[] pts;
-        SortedDictionary<Vector2d, SmartCell> cells;
+        SortedDictionary<Vector2dInt, SmartCell> cells;
         public int divsX;
         public int divsY;
         public List<string> tShoot;
@@ -58,7 +58,7 @@ namespace Planbee
             _coreCurves = new Curve[1];
             _coreCurves[0] = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
             PopulateCells();
 
         }
@@ -77,7 +77,7 @@ namespace Planbee
             _coreCurves = new Curve[1];
             _coreCurves[0] = perimCurve.Offset(Plane.WorldXY, -leaseSpan, 0.01, CurveOffsetCornerStyle.Chamfer)[0];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
             PopulateCells();
         }
 
@@ -95,7 +95,7 @@ namespace Planbee
             for (int i = 0; i < _coreCurves.Length; i++)
                 _coreCurves[i] = coreCurves[i];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
             PopulateCells();
 
         }
@@ -112,7 +112,7 @@ namespace Planbee
 
             this.perimCurve = perimCurve;
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
             PopulateCells();
         }
 
@@ -130,7 +130,7 @@ namespace Planbee
             for (int i = 0; i < _coreCurves.Length; i++)
                 _coreCurves[i] = coreCurves[i];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
             PopulateCells();
         }
 
@@ -155,11 +155,11 @@ namespace Planbee
             for (int i = 0; i < _coreCurves.Length; i++)
                 _coreCurves[i] = coreCurves[i];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
 
                 SmartCell cellExisting;
@@ -190,11 +190,11 @@ namespace Planbee
             this._resolution = Math.Sqrt(rectangles[0].Area);
             exitCells = new SmartCell[0];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
 
                 SmartCell cellExisting;
@@ -229,11 +229,11 @@ namespace Planbee
             for (int i = 0; i < _coreCurves.Length; i++)
                 _coreCurves[i] = coreCurves[i];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
@@ -269,11 +269,11 @@ namespace Planbee
                 interiorPartitionMesh.Append(meshLocal);
             }
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
@@ -294,11 +294,11 @@ namespace Planbee
             this._resolution = Math.Sqrt(rectangles[0].Area);
             exitCells = new SmartCell[exitPoints.Count];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
@@ -332,11 +332,11 @@ namespace Planbee
                 interiorPartitionMesh.Append(meshLocal);
             }
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
@@ -381,11 +381,11 @@ namespace Planbee
             for (int i = 0; i < _coreCurves.Length; i++)
                 _coreCurves[i] = coreCurves[i];
 
-            cells = new SortedDictionary<Vector2d, SmartCell>();
+            cells = new SortedDictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
             {
-                var loc = new Vector2d(rectangles[i].Center.X, rectangles[i].Center.Y);
+                var loc = new Vector2dInt((int)Math.Round(rectangles[i].Center.X), (int)Math.Round(rectangles[i].Center.Y));
                 var _cell = new SmartCell(loc, this._resolution);
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
@@ -409,7 +409,7 @@ namespace Planbee
         {
             var rects = new List<Rectangle3d>();
 
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 rects.Add(_cell.Value.rect);
             }
@@ -422,7 +422,7 @@ namespace Planbee
             {
                 var att = new double[cells.Count];
                 int count = 0;
-                foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+                foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
                 {
                     att[count] = _cell.Value.metric4;
                     count++;
@@ -435,7 +435,7 @@ namespace Planbee
         {
             var att = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 att[count] = _cell.Value.metric5;
                 count++;
@@ -447,7 +447,7 @@ namespace Planbee
         {
             var att = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 att[count] = _cell.Value.neighSizeRaw;
                 count++;
@@ -458,7 +458,7 @@ namespace Planbee
         {
             var att = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 att[count] = _cell.Value.neighSize;
                 count++;
@@ -470,7 +470,7 @@ namespace Planbee
         {
             var att = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 att[count] = _cell.Value.mspRaw;
                 count++;
@@ -483,7 +483,7 @@ namespace Planbee
         {
             double[] isos = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 isos[count] = _cell.Value.metric1;
                 count++;
@@ -495,7 +495,7 @@ namespace Planbee
         {
             var perim = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 perim[count] = _cell.Value.metric2;
                 count++;
@@ -508,7 +508,7 @@ namespace Planbee
         {
             var att = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 att[count] = _cell.Value.metric3;
                 count++;
@@ -520,7 +520,7 @@ namespace Planbee
         {
             var solar = new double[cells.Count];
             int count = 0;
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 solar[count] = _cell.Value.metric2;
                 count++;
@@ -585,10 +585,10 @@ namespace Planbee
                 for (int j = 0; j < divsY; j++)
                 {
                     var samplePt = new Point3d(i * this._resolution + minPoint.X, j * this._resolution + minPoint.Y, 0);
-                    var roundedPt = new Vector2d((int)Math.Round(samplePt.X, 0, MidpointRounding.AwayFromZero),
+                    var roundedPt = new Vector2dInt((int)Math.Round(samplePt.X, 0, MidpointRounding.AwayFromZero),
                       (int)Math.Round(samplePt.Y, 0, MidpointRounding.AwayFromZero));
-                    var loc = new Vector2d(samplePt.X, samplePt.Y);
-                    var index = new Vector2d(Math.Round(roundedPt.X / this._resolution), Math.Round(roundedPt.Y / this._resolution));
+                    var loc = new Vector2dInt((int)Math.Round(samplePt.X), (int) Math.Round(samplePt.Y));
+                    var index = new Vector2dInt((int)Math.Round(roundedPt.X / this._resolution), (int)Math.Round(roundedPt.Y / this._resolution));
 
                     if (this.perimCurve.Contains(samplePt, _plane, 0.00001) != Rhino.Geometry.PointContainment.Inside)
                     {
@@ -656,7 +656,7 @@ namespace Planbee
 
             Ray3d ray;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 int hitMiss = 0;
                 Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
@@ -679,7 +679,7 @@ namespace Planbee
 
             }
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric2, min, max, 0.00, 1.00);
                 cell.Value.metric2 = holder;
@@ -724,7 +724,7 @@ namespace Planbee
 
             int count = 0;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var interSum = 0.0;
                 Polyline poly = new Polyline();
@@ -810,7 +810,7 @@ namespace Planbee
                 count++;
             }
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.neighSizeRaw, min, max, 0.00, 1.00);
                 cell.Value.neighSize = holder;
@@ -850,7 +850,7 @@ namespace Planbee
 
             int count = 0;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var interSum = 0.0;
                 Polyline poly = new Polyline();
@@ -924,7 +924,7 @@ namespace Planbee
                 count++;
             }
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric1, min, max, 0.00, 1.00);
                 cell.Value.metric1 = holder;
@@ -936,7 +936,7 @@ namespace Planbee
         {
             var min = 1000.0;
             var max = 1.0;
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var testPoint = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
                 double t;
@@ -953,7 +953,7 @@ namespace Planbee
                 }
             }
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric2, min, max, 0.0, 1.0);
                 var final = 1.0 - holder;
@@ -1004,7 +1004,7 @@ namespace Planbee
                 var max = -1.0;
                 int count = 0;
 
-                foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
                 {
                     Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
                     Vector3d dDir;
@@ -1043,7 +1043,7 @@ namespace Planbee
                     count++;
                 }
 
-                foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
                 {
                     var holder = PBUtilities.mapValue(cell.Value.metric3, min, max, 0.00, 1.00);
                     cell.Value.metric3 = holder;
@@ -1064,7 +1064,7 @@ namespace Planbee
             int count = 0;
             Polyline localPath;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 double distance = 0.0;
                 for (int j = 0; j < exitCells.Length; j++)
@@ -1076,10 +1076,10 @@ namespace Planbee
                     for (int i = 0; i < steps.Count; i++)
                     {
                         if (i == 0)
-                            distance += (cell.Value.location - steps[i].location).Length;
+                            distance += (cell.Value.location - steps[i].location).ToVector2d().Length;
 
                         else
-                            distance += (steps[i].location - steps[i - 1].location).Length;
+                            distance += (steps[i].location - steps[i - 1].location).ToVector2d().Length;
 
                         localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
                         if (i == steps.Count - 1)
@@ -1096,7 +1096,7 @@ namespace Planbee
                 count++;
             }
 
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric4, min, max, 0.00, 1.00);
                 var final = 1.0 - holder;
@@ -1139,10 +1139,10 @@ namespace Planbee
                         for (int k = 0; k < steps.Count; k++)
                         {
                             if (k == 0)
-                                distance += (cells1[k].Value.location - steps[k].location).Length;
+                                distance += (cells1[k].Value.location - steps[k].location).ToVector2d().Length;
 
                             else
-                                distance += (steps[k].location - steps[k - 1].location).Length;
+                                distance += (steps[k].location - steps[k - 1].location).ToVector2d().Length;
 
                             localPath.Add(new Point3d(steps[k].location.X, steps[k].location.Y, 0));
                             if (k == steps.Count - 1)
@@ -1158,7 +1158,7 @@ namespace Planbee
             }
 
             //find min and max
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 double distance = cell.Value.metric5;
                 if (distance < min)
@@ -1168,7 +1168,7 @@ namespace Planbee
             }
 
             //remap vals
-            foreach (KeyValuePair<Vector2d, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric5, min, max, 0.00, 1.00);
                 var final = 1.0 - holder;
@@ -1178,7 +1178,7 @@ namespace Planbee
 
         public void AssignInactiveCells()
         {
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 var pt = new Point3d(_cell.Value.location.X, _cell.Value.location.Y, 0);
                 var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
@@ -1287,7 +1287,7 @@ namespace Planbee
                 {
                     int x = (int)(xi + cell.index.X);
 
-                    var i = new Vector2d(x, y);
+                    var i = new Vector2dInt(x, y);
 
                     if (cell.index == i) continue;
 
@@ -1312,10 +1312,10 @@ namespace Planbee
             int count = 0;
             double[] distances = new double[cells.Count];
 
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
                 _cell.Value.tempMetric = 0.0;
 
-            foreach (KeyValuePair<Vector2d, SmartCell> _cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 var pt = new Point3d(_cell.Value.location.X, _cell.Value.location.Y, 0);
                 _cell.Value.tempMetric = pt.DistanceTo(target);
