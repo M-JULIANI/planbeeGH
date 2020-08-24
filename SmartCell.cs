@@ -27,7 +27,7 @@ namespace Planbee
 {
 
     public struct Vector2dInt: IEquatable<Vector2dInt>
-    {
+    { 
         private int x { get; set; }
         public int X { get { return x; }} 
         private int y { get; set; }
@@ -106,7 +106,7 @@ namespace Planbee
         public double neighSizeRaw;
         public double neighSize;
         public double tempMetric;
-        public Vector2dInt location;
+        public Vector2d location;
         public Vector2dInt index;
         public double _resolution;
         public Rectangle3d rect;
@@ -122,13 +122,13 @@ namespace Planbee
         //public Grid2d _grid;
         // public bool IsClimbable => IsActive && Faces.Any(f => f.IsClimbable);
 
-        public SmartCell(Vector2dInt location, double _resolution, double metric1, double metric2, double metric3, double metric4)
+        public SmartCell(Vector2d location, double _resolution, double metric1, double metric2, double metric3, double metric4)
         {
             this._resolution = _resolution;
             this.location = location;
-            int roundedX = (location.X);
+            int roundedX = (int)(location.X);
             roundedX *= 5;
-            int roundedY = (location.Y);
+            int roundedY = (int)(location.Y);
             roundedY *= 5;
 
             //index = new Vector2d(Math.Round(roundedX / this._resolution * 5.0), Math.Round(roundedX / this._resolution * 5.0));
@@ -149,13 +149,13 @@ namespace Planbee
             isActive = true;
         }
 
-        public SmartCell(Vector2dInt location, double _resolution)
+        public SmartCell(Vector2d location, double _resolution)
         {
             this._resolution = _resolution;
             this.location = location;
-            int roundedX = location.X;
+            int roundedX = (int)location.X;
             roundedX *= 5;
-            int roundedY = (location.Y);
+            int roundedY = (int)(location.Y);
             roundedY *= 5;
 
             //index = new Vector2d(Math.Round(roundedX / this._resolution * 5.0), Math.Round(roundedX / this._resolution * 5.0));
