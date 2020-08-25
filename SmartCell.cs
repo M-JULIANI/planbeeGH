@@ -22,6 +22,7 @@ using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using PlanBee;
 
 namespace Planbee
 {
@@ -111,6 +112,9 @@ namespace Planbee
         public double _resolution;
         public Rectangle3d rect;
 
+
+        Grid2d _grid;
+
         public int gCost;
         public int hCost;
 
@@ -176,6 +180,53 @@ namespace Planbee
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
 
+        }
+
+        public SmartCell(Vector2d location, double _resolution, Grid2d grid)
+        {
+            _grid = grid;
+            this._resolution = _resolution;
+            this.location = location;
+            int roundedX = (int)location.X;
+            roundedX *= 5;
+            int roundedY = (int)(location.Y);
+            roundedY *= 5;
+
+            //index = new Vector2d(Math.Round(roundedX / this._resolution * 5.0), Math.Round(roundedX / this._resolution * 5.0));
+
+            index = new Vector2dInt((int)Math.Round(location.X / this._resolution), (int)Math.Round(location.Y / this._resolution));
+
+            this.metric1 = 0.0;
+            this.metric2 = 0.0;
+            this.metric3 = 0.0;
+            this.metric4 = 0.0;
+            this.metric5 = 0.0;
+            this.mspRaw = 0.0;
+            this.tempMetric = 0.0;
+            this.neighSize = 0.0;
+            this.neighSizeRaw = 0.0;
+            Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
+            Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
+            rect = new Rectangle3d(plane, interval, interval);
+            isActive = true;
+
+        }
+
+        public Face[] Faces
+        {
+            get
+            {
+                int x = index.X;
+                int y = index.Y;
+
+                return new[]
+                {
+                  _grid.Faces[new AxisVector2dInt(PBUtilities.Axis.X, x - 1, y)],
+                  _grid.Faces[new AxisVector2dInt(PBUtilities.Axis.X, x + 1, y)],
+                  _grid.Faces[new AxisVector2dInt(PBUtilities.Axis.Y, x, y - 1)],
+                  _grid.Faces[new AxisVector2dInt(PBUtilities.Axis.Y, x, y + 1)],
+                };
+            }
         }
 
     }

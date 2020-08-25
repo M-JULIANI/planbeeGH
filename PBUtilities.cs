@@ -28,6 +28,10 @@ namespace Planbee
 {
     public static class PBUtilities
     {
+
+        public enum Axis { X, Y, Z };
+        public enum BoundaryType { Inside = 0, Left = -1, Right = 1, Outside = 2 }
+
         public static Point3d[] getDiscontinuities(Curve curve)
         {
             var t0 = curve.Domain.T0;

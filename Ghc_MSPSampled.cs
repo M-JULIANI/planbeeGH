@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Grasshopper.Kernel;
-using Rhino.Geometry;
-using Rhino.Display;
 using System.Threading.Tasks;
+using Grasshopper.Kernel;
+using Rhino.Display;
+using Rhino.Geometry;
 using Planbee;
 
 namespace PlanBee
 {
-    public class GhcMeanShortestPaths : GH_TaskCapableComponent<GhcMeanShortestPaths.SolveResults>
+    public class Ghc_MSPSampled : GH_TaskCapableComponent<Ghc_MSPSampled.SolveResults>
     {
+
 
         bool autoColor = false;
         SmartPlan _plan;
@@ -20,11 +20,11 @@ namespace PlanBee
         double[] _rawMspMetric;
 
         /// <summary>
-        /// Initializes a new instance of the Ghc_MeanShortestPaths class.
+        /// Initializes a new instance of the Ghc_MSPQuickGraph class.
         /// </summary>
-        public GhcMeanShortestPaths()
-          : base("Mean Shortest Paths", "MSP",
-              "The shortest path from each cell to every other cell",
+        public Ghc_MSPSampled()
+          : base("Sampled Mean Shortest Path", "MSP Sampled",
+              "Description",
               "PlanBee", "Analysis")
         {
         }
@@ -37,6 +37,7 @@ namespace PlanBee
         int OUT_paths;
         int OUT_mspMetric;
         int OUT_mspRawMetric;
+
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -84,17 +85,10 @@ namespace PlanBee
 
                     _plan = new SmartPlan(rectangles, interiorPartitions, plane);
 
-                    if (_plan.getCells().Count > 200)
-                    {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Too many nodes used for this computation");
-                        return;
-                    }
-                    else
-                    {
-                        Task<SolveResults> task = Task.Run(() => ComputeMSP(_plan), CancelToken);
-                        TaskList.Add(task);
-                        return;
-                    }
+
+                    Task<SolveResults> task = Task.Run(() => ComputeMSP(_plan), CancelToken);
+                    TaskList.Add(task);
+                    return;
                 }
 
                 if (!GetSolveResults(DA, out SolveResults result))
@@ -108,17 +102,8 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     _plan = new SmartPlan(rectangles, interiorPartitions, plane);
-                    if (_plan.getCells().Count > 150)
-                    {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Too many nodes used for this computation. Either increase the resolution of " +
-                            "the plan or use the 'Sampled Mean Shortest Path' component.");
-                        return;
-                    }
-                    else
-                    {
-                        result = ComputeMSP(_plan);
-                        _plan = result.Value;
-                    }
+                    result = ComputeMSP(_plan);
+                    _plan = result.Value;
                 }
 
 
@@ -145,7 +130,7 @@ namespace PlanBee
         public static SolveResults ComputeMSP(SmartPlan plan)
         {
             SolveResults result = new SolveResults();
-            plan.ComputeMeanShortestPath();
+            plan.ComputeSampleMeanShortestPath();
             result.Value = plan;
             return result;
         }
@@ -159,7 +144,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.MeanShortestPath_01;
+                return Properties.Resources.MeanShortestPath_Sampled_01;
             }
         }
 
@@ -168,7 +153,7 @@ namespace PlanBee
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("77512942-8ce7-47cc-9118-eebdd8448467"); }
+            get { return new Guid("8f10c77e-2226-4f8a-8f86-dd2e4300c42e"); }
         }
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)

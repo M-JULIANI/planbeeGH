@@ -43,6 +43,18 @@
     <Reference Include="Grasshopper, Version=6.15.19164.21010, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
       <HintPath>packages\Grasshopper.6.15.19164.21011\lib\net45\Grasshopper.dll</HintPath>
     </Reference>
+    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="Rhino.UI, Version=6.15.19164.21010, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
       <HintPath>packages\RhinoCommon.6.15.19164.21011\lib\net45\Rhino.UI.dll</HintPath>
     </Reference>
@@ -64,6 +76,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AxisVector2dInt.cs" />
+    <Compile Include="Face.cs" />
     <Compile Include="GhcAnalysisPeriod.cs" />
     <Compile Include="GhcAttractions.cs" />
     <Compile Include="GhcDaylightAccess.cs" />
@@ -77,6 +91,8 @@
     <Compile Include="GhcSimpleCells.cs" />
     <Compile Include="GhcSingleSpaceCells.cs" />
     <Compile Include="Ghc_MeanShortestPaths.cs" />
+    <Compile Include="Ghc_MSPSampled.cs" />
+    <Compile Include="Grid2d.cs" />
     <Compile Include="KMap.cs" />
     <Compile Include="PBSun.cs" />
     <Compile Include="PBUtilities.cs" />
@@ -173,6 +189,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\NeighborhoodSize-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\MeanShortestPath_Sampled-01.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
