@@ -118,7 +118,8 @@ namespace PlanBee
                     clusterCoeff = new double [neighborhoodSize.Length];
                     for (int i = 0; i < clusterCoeff.Length; i++)
                     {
-                        clusterCoeff[i] = neighborhoodSize[i]*1.0 / PBUtilities.FactorialR(neighborhoodSize[i]);
+                        clusterCoeff[i] = neighborhoodSize[i] * 1.0;
+                        //clusterCoeff[i] = neighborhoodSize[i] * 1.0 / PBUtilities.FactorialR(neighborhoodSize[i]);
                     }
 
                     DA.SetDataList(OUT_clusteringCoefficient, clusterCoeff);

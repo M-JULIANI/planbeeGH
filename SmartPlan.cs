@@ -860,7 +860,7 @@ namespace Planbee
                 else
                     area = 0.0;
 
-                cell.Value.neighSizeRaw = area / _resolution; //approximates the number of grid nodes 'cell'
+                cell.Value.neighSizeRaw = area / _resolution * _resolution; //approximates the number of grid nodes 'cell'
                 //is connected to
 
                 if (area < min)
