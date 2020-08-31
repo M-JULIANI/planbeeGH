@@ -41,6 +41,7 @@ namespace Planbee
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         int IN_programAreas;
         int IN_programFeatures;

@@ -56,6 +56,7 @@ namespace Planbee
         int OUT_isovistMetric;
         int OUT_isovistPolys;
 
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

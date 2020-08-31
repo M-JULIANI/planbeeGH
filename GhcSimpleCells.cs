@@ -28,6 +28,7 @@ namespace PlanBee
         int OUT_cells;
         int OUT_resolution;
 
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

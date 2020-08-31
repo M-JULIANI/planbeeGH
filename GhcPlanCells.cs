@@ -32,6 +32,8 @@ namespace Planbee
         int OUT_resolution;
         int OUT_areaFeedback;
 
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             IN_areas = pManager.AddNumberParameter("Program Areas", "Areas", "List of total program areas to ensure compliance with. If no error is thrown, areas are compliant", GH_ParamAccess.list);

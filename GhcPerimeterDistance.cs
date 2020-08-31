@@ -27,15 +27,15 @@ namespace Planbee
 
         }
 
-        int IN_reset;
         int IN_plane;
         int IN_AutoColor;
         int IN_perimCurve;
         int IN_coreCurves;
         int IN_rects;
 
-
         int OUT_perimeterMetric;
+
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

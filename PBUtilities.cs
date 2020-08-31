@@ -87,12 +87,23 @@ namespace Planbee
                         .Select(g => g.Select(x => x.item));
         }
 
-        public static int FactorialR(int inputVal)
+        public static long FactorialR(int inputVal)
         {
             if (inputVal == 1)
                 return inputVal;
             else
                 return inputVal * FactorialR(inputVal - 1);
+        }
+
+        public static int FactorialFor(int inputVal)
+        {
+            int factorial = inputVal;
+            for (int i = inputVal - 1; i >= 1; i--)
+            {
+                factorial = factorial * i;
+            }
+
+            return factorial;
         }
     }
 

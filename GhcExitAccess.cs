@@ -18,6 +18,7 @@ namespace Planbee
         System.Drawing.Color[] gradientList;
         double[] _exitMetric;
 
+        public override GH_Exposure Exposure => GH_Exposure.primary;
         /// <summary>
         /// Initializes a new instance of the GhcExitAccess class.
         /// </summary>

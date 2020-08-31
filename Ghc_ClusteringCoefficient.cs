@@ -38,6 +38,8 @@ namespace PlanBee
 
         int OUT_clusteringCoefficient;
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -116,11 +118,27 @@ namespace PlanBee
                 {
                     var neighborhoodSize = _plan.getNeighborhoodSizeRaw();
                     clusterCoeff = new double [neighborhoodSize.Length];
-                    for (int i = 0; i < clusterCoeff.Length; i++)
+                    double[] remappedAreas = new double[neighborhoodSize.Length];
+
+                    double min = 100000.0;
+                    double max = -1.0;
+
+                    for (int i = 0; i < neighborhoodSize.Length; i++)
                     {
-                        clusterCoeff[i] = neighborhoodSize[i] * 1.0;
-                        //clusterCoeff[i] = neighborhoodSize[i] * 1.0 / PBUtilities.FactorialR(neighborhoodSize[i]);
+                        if (neighborhoodSize[i] < min)
+                            min = neighborhoodSize[i];
+                        if (neighborhoodSize[i] > max)
+                            max = neighborhoodSize[i];
                     }
+
+                    for (int i = 0; i < remappedAreas.Length; i++)
+                    {
+                        //remapped neighborhood size values for quick factorial calc
+                        remappedAreas[i] = PBUtilities.mapValue(neighborhoodSize[i], min, max, 0.0, 20.0);
+                    }
+
+                    for (int i = 0; i < clusterCoeff.Length; i++)
+                        clusterCoeff[i] = remappedAreas[i] / PBUtilities.FactorialFor((int)Math.Round(remappedAreas[i])); // PBUtilities.FactorialR((int)Math.Round(remappedAreas[i]));
 
                     DA.SetDataList(OUT_clusteringCoefficient, clusterCoeff);
                 }

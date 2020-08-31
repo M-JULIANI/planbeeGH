@@ -93,6 +93,7 @@
     <Compile Include="Ghc_ClusteringCoefficient.cs" />
     <Compile Include="Ghc_MeanShortestPaths.cs" />
     <Compile Include="Ghc_MSPSampled.cs" />
+    <Compile Include="Ghc_PlanBeeInfo.cs" />
     <Compile Include="Grid2d.cs" />
     <Compile Include="KMap.cs" />
     <Compile Include="PBSun.cs" />
@@ -193,6 +194,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\MeanShortestPath_Sampled-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\PlanBee Component-01.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

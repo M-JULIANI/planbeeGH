@@ -40,7 +40,9 @@ namespace Planbee
         int OUT_attractorMetric;
         int OUT_attractorViewLines;
 
-     
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
+
 
         /// <summary>
         /// Registers all the input parameters for this component.

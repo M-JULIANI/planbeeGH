@@ -40,6 +40,7 @@ namespace Planbee
         int OUT_obs;
 
 
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

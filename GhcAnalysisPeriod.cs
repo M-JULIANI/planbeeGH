@@ -31,6 +31,8 @@ namespace Planbee
         PBSun _sun;
         List<Vector3d> sunVecs;
 
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
