@@ -501,13 +501,13 @@ namespace Planbee
             return att;
         }
 
-        public double[] getNeighborhoodSizeRaw()
+        public int[] getNeighborhoodSizeRaw()
         {
-            var att = new double[cells.Count];
+            var att = new int[cells.Count];
             int count = 0;
             foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
-                att[count] = _cell.Value.neighSizeRaw;
+                att[count] = (int)Math.Round(_cell.Value.neighSizeRaw);
                 count++;
             }
             return att;

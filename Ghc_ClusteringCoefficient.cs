@@ -3,44 +3,28 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using Rhino.Display;
-using Rhino.DocObjects;
 
-using System.IO;
-using System.Linq;
-using System.Data;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
 using System.Threading.Tasks;
 using Planbee;
 
 namespace PlanBee
 {
-    public class GhcNeighborhoodSize : GH_TaskCapableComponent<GhcNeighborhoodSize.SolveResults>
+    public class Ghc_ClusteringCoefficient : GH_TaskCapableComponent<Ghc_ClusteringCoefficient.SolveResults>
     {
 
         bool autoColor = false;
         SmartPlan _plan;
         List<Rectangle3d> rectangles = new List<Rectangle3d>();
         System.Drawing.Color[] gradientList;
-        int[] rawNeighSize;
-        double[] neighSize;
+        double[] clusterCoeff;
 
         /// <summary>
-        /// Initializes a new instance of the GhcNeighborhoodSize class.
+        /// Initializes a new instance of the Ghc_ClusteringCoefficient class.
         /// </summary>
-        public GhcNeighborhoodSize()
-          : base("Neighborhood Size", "Neighborhood Size",
-              "Neighborhood size equivalent to the area of the isovist polygon",
+        public Ghc_ClusteringCoefficient()
+          : base("Clustering Coefficient", "Clustering Coefficient",
+              "The clustering coefficient of of all cells. 'The clustering coefficient gives a measure of the proportion of intervisible space within the visibility neighbourhood of a point.'" +
+                "For more information refer to Alasdair Turners paper: 'From isovists to visibility graphs: a methodology for the analysis of architectural space'.",
               "PlanBee", "Analysis")
         {
         }
@@ -52,9 +36,7 @@ namespace PlanBee
         int IN_rects;
         int IN_partitions;
 
-        int OUT_neighSizeMetric;
-        int OUT_rawNeighSizeMetric;
-        int OUT_isovistPolys;
+        int OUT_clusteringCoefficient;
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -75,9 +57,7 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            OUT_neighSizeMetric = pManager.AddNumberParameter("Normalized Neighborhood Size metric per voxel", "Normalized Neighborhood Size", "The neighborhood size metric of each cell, remapped from 0 to 1 using the bounds of the plan as remapping domain", GH_ParamAccess.list);
-            OUT_rawNeighSizeMetric = pManager.AddNumberParameter("Raw Neighborhood Size metric per voxel", "Raw Neighborhood Size", "The raw neighborhood size metric of each cell", GH_ParamAccess.list);
-            OUT_isovistPolys = pManager.AddCurveParameter("Isovist Polygons", "Iso Polygons", "Isovist polyline polygons describing range of vision from each plan voxel", GH_ParamAccess.list);
+            OUT_clusteringCoefficient = pManager.AddNumberParameter("Clustering coefficient metric per voxel", "Clustering Coefficient", "The clustering coefficient of each cell", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -134,11 +114,14 @@ namespace PlanBee
 
                 if (result != null)
                 {
-                    rawNeighSize = _plan.getNeighborhoodSizeRaw();
-                    neighSize = _plan.getNeighborhoodSize();
-                    DA.SetDataList(OUT_neighSizeMetric, neighSize);
-                    DA.SetDataList(OUT_rawNeighSizeMetric, rawNeighSize);
-                    DA.SetDataList(OUT_isovistPolys, _plan.isoNeighPolylines);
+                    var neighborhoodSize = _plan.getNeighborhoodSizeRaw();
+                    clusterCoeff = new double [neighborhoodSize.Length];
+                    for (int i = 0; i < clusterCoeff.Length; i++)
+                    {
+                        clusterCoeff[i] = neighborhoodSize[i]*1.0 / PBUtilities.FactorialR(neighborhoodSize[i]);
+                    }
+
+                    DA.SetDataList(OUT_clusteringCoefficient, clusterCoeff);
                 }
             }
             catch (Exception e)
@@ -169,68 +152,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.NeighborhoodSize_01;
-            }
-        }
-
-
-        public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        {
-
-            if (autoColor)
-            {
-                gradientList = new System.Drawing.Color[_plan.getCells().Count];
-                for (int i = 0; i < gradientList.Length; i++)
-                {
-                    var multiplier = neighSize[i];
-
-                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
-                    var rgb = gColor.ToArgbColor();
-                    gradientList[i] = (rgb);
-                }
-                for (int i = 0; i < rectangles.Count; i++)
-                {
-                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
-                    mat.Shine = 0.25;
-                    {
-                        var curve = rectangles[i].ToNurbsCurve();
-                        var pts = rectangles[i].ToPolyline();
-                        args.Display.DrawPolyline(pts, gradientList[i], 1);
-                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
-                        args.Display.DrawMeshShaded(mesh, mat);
-                    }
-                }
-
-            }
-        }
-
-        public override void DrawViewportWires(IGH_PreviewArgs args)
-        {
-            if (autoColor)
-            {
-                gradientList = new System.Drawing.Color[_plan.getCells().Count];
-
-                for (int i = 0; i < gradientList.Length; i++)
-                {
-                    var multiplier = neighSize[i];
-
-                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
-                    var rgb = gColor.ToArgbColor();
-                    gradientList[i] = (rgb);
-                }
-                for (int i = 0; i < rectangles.Count; i++)
-                {
-                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
-                    mat.Shine = 0.25;
-                    {
-                        var curve = rectangles[i].ToNurbsCurve();
-                        var pts = rectangles[i].ToPolyline();
-                        args.Display.DrawPolyline(pts, gradientList[i], 1);
-                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
-                        args.Display.DrawMeshShaded(mesh, mat);
-                    }
-                }
-
+                return null;
             }
         }
 
@@ -239,7 +161,7 @@ namespace PlanBee
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("2956704c-0f2b-4e1f-b3f6-c47e98d64eac"); }
+            get { return new Guid("d50365c5-ce44-473e-b6b6-c5ec4565cad2"); }
         }
     }
 }

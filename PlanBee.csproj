@@ -90,6 +90,7 @@
     <Compile Include="GhcPlanCells.cs" />
     <Compile Include="GhcSimpleCells.cs" />
     <Compile Include="GhcSingleSpaceCells.cs" />
+    <Compile Include="Ghc_ClusteringCoefficient.cs" />
     <Compile Include="Ghc_MeanShortestPaths.cs" />
     <Compile Include="Ghc_MSPSampled.cs" />
     <Compile Include="Grid2d.cs" />
