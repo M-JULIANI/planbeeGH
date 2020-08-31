@@ -35,7 +35,7 @@ namespace Planbee
 
         Grid2d _grid;
         public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> _graph;
-        public IEnumerable<TaggedEdge<SmartCell,Face>> graphEdges;
+        public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
         public IEnumerable<double> edgeLengths;
 
         public Curve[] attrCrvs;
@@ -187,6 +187,49 @@ namespace Planbee
 
         }
 
+        //c0re-less isovist constructor
+        public SmartPlan(Curve perimCurve, List<Rectangle3d> rectangles, List<Curve> _interiorPartitions, Plane plane)
+        {
+            _plane = new Plane(plane.Origin, Vector3d.ZAxis);
+            project = Transform.PlanarProjection(_plane);
+
+            this._resolution = Math.Sqrt(rectangles[0].Area);
+            exitCells = new SmartCell[0];
+            _partCurves = new Curve[_interiorPartitions.Count];
+            for (int i = 0; i < _partCurves.Length; i++)
+            {
+                _interiorPartitions[i].Transform(project);
+                _partCurves[i] = _interiorPartitions[i];
+            }
+
+            this.perimCurve = perimCurve;
+
+            cells = new Dictionary<Vector2dInt, SmartCell>();
+
+            for (int i = 0; i < rectangles.Count; i++)
+            {
+                var loc = PlaceLocation(rectangles[i]);
+                var _cell = new SmartCell(loc, this._resolution);
+
+                SmartCell cellExisting;
+                if (cells.TryGetValue(_cell.index, out cellExisting))
+                    continue;
+                else
+                    cells.Add(_cell.index, _cell);
+            }
+
+            int size = 75;
+            isovistDirections = new Vector3d[size];
+
+            for (int i = 0; i < isovistDirections.Length; i++)
+            {
+                var modSin = i * (Math.PI * 2.0) / size;
+                var vec = new Vector3d(Math.Sin(modSin), Math.Cos(modSin), 0);
+                isovistDirections[i] = vec;
+            }
+
+        }
+
         //solar access constructor
         public SmartPlan(List<Rectangle3d> rectangles, List<Vector3d> SunVectors, List<Brep> obstacles, Plane plane)
         {
@@ -284,11 +327,12 @@ namespace Planbee
             {
                 var loc = PlaceLocation(rectangles[i]);
                 var _cell = new SmartCell(loc, this._resolution);
-                
+
                 SmartCell cellExisting;
                 if (cells.TryGetValue(_cell.index, out cellExisting))
                     continue;
-                else {
+                else
+                {
                     var pt = new Point3d(_cell.location.X, _cell.location.Y, 0);
                     var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
                     var output = pt.DistanceTo(meshPt.Point).ToString();
@@ -752,19 +796,20 @@ namespace Planbee
             interiorPartitionMesh = new Mesh();
             meshCore = new Mesh();
 
-            Extrusion[] extrusionCores = new Extrusion[_coreCurves.Length];
-            for (int i = 0; i < _coreCurves.Length; i++)
+            Extrusion[] extrusionCores;
+            if (_coreCurves != null)
             {
-                var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
-                extr.Transform(mov);
-                meshCore.Append(Mesh.CreateFromSurface(extr));
+                extrusionCores = new Extrusion[_coreCurves.Length];
+                for (int i = 0; i < _coreCurves.Length; i++)
+                {
+                    var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
+                    extr.Transform(mov);
+                    meshCore.Append(Mesh.CreateFromSurface(extr));
+                }
             }
-
 
             var curveOff = this.perimCurve.Offset(_plane, -this._resolution / 2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
             var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
-
-
 
             for (int i = 0; i < _partCurves.Length; i++)
             {
@@ -860,8 +905,8 @@ namespace Planbee
                 else
                     area = 0.0;
 
-                double neighborhood = area /( this._resolution * this._resolution);//approximates the number of grid nodes 'cell' is connected to
-                cell.Value.neighSizeRaw = neighborhood; 
+                double neighborhood = area / (this._resolution * this._resolution);//approximates the number of grid nodes 'cell' is connected to
+                cell.Value.neighSizeRaw = neighborhood;
 
                 if (neighborhood < min)
                     min = neighborhood;
@@ -886,12 +931,16 @@ namespace Planbee
             interiorPartitionMesh = new Mesh();
             meshCore = new Mesh();
 
-            Extrusion[] extrusionCores = new Extrusion[_coreCurves.Length];
-            for (int i = 0; i < _coreCurves.Length; i++)
+            Extrusion[] extrusionCores;
+            if (_coreCurves != null)
             {
-                var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
-                extr.Transform(mov);
-                meshCore.Append(Mesh.CreateFromSurface(extr));
+                extrusionCores = new Extrusion[_coreCurves.Length];
+                for (int i = 0; i < _coreCurves.Length; i++)
+                {
+                    var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
+                    extr.Transform(mov);
+                    meshCore.Append(Mesh.CreateFromSurface(extr));
+                }
             }
 
             var curveOff = this.perimCurve.Offset(_plane, -this._resolution / 2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
@@ -1166,7 +1215,7 @@ namespace Planbee
         }
 
 
-        public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt>  indices)
+        public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt> indices)
         {
             int stepCount = 0;
             var vox = this._grid.GetVoxels();
@@ -1174,7 +1223,7 @@ namespace Planbee
 
             if (_grid.Voxels.TryGetValue(endIn.index, out var end))
             {
-                var shortest = _graph.ShortestPathsDijkstra(e=>new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
+                var shortest = _graph.ShortestPathsDijkstra(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
 
                 if (shortest(end, out var path))
                 {
@@ -1264,7 +1313,7 @@ namespace Planbee
                 cells.Add(cells1[i].index, cells1[i]);
 
             //find min and max
-            foreach(KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 double distance = cell.Value.metric5;
                 if (distance < min)
@@ -1369,7 +1418,7 @@ namespace Planbee
 
             int cellCount = 0;
 
-            while(cellCount < numberCells)
+            while (cellCount < numberCells)
             {
                 var randInt = random.Next(0, cells.Length);
                 if (usedIndeces.Contains(randInt))
@@ -1386,7 +1435,7 @@ namespace Planbee
                 cellsOut.Add(cells[indeces[i]]);
 
             return cellsOut;
-            
+
         }
 
         //MSP Computation
@@ -1410,23 +1459,23 @@ namespace Planbee
                 List<SmartCell> steps;
                 for (int j = 0; j < cells2.Count; j++)
                 {
-                        localPath = new Polyline();
-                        steps = FindPath(cells1[i], cells2[j]);
+                    localPath = new Polyline();
+                    steps = FindPath(cells1[i], cells2[j]);
 
-                        localPath.Add(new Point3d(cells1[i].location.X, cells1[i].location.Y, 0));
-                        for (int k = 0; k < steps.Count; k++)
-                        {
-                            if (k == 0)
-                                distance += (cells1[k].location - steps[k].location).Length;
+                    localPath.Add(new Point3d(cells1[i].location.X, cells1[i].location.Y, 0));
+                    for (int k = 0; k < steps.Count; k++)
+                    {
+                        if (k == 0)
+                            distance += (cells1[k].location - steps[k].location).Length;
 
-                            else
-                                distance += (steps[k].location - steps[k - 1].location).Length;
+                        else
+                            distance += (steps[k].location - steps[k - 1].location).Length;
 
-                            localPath.Add(new Point3d(steps[k].location.X, steps[k].location.Y, 0));
-                            if (k == steps.Count - 1)
-                                pathCurves.Add(localPath, new GH_Path(countOut));
-                        }
-                        count++;
+                        localPath.Add(new Point3d(steps[k].location.X, steps[k].location.Y, 0));
+                        if (k == steps.Count - 1)
+                            pathCurves.Add(localPath, new GH_Path(countOut));
+                    }
+                    count++;
                 }
                 cells1[i].metric5 = distance / count;
                 cells1[i].mspRaw = distance / count;

@@ -69,6 +69,7 @@ namespace PlanBee
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extent of the core boundaries", GH_ParamAccess.list);
+            pManager[IN_coreCurves].Optional = true;
             IN_partitions = pManager.AddCurveParameter("Partition Curves", "Partitions", "Polylines describing partitions", GH_ParamAccess.list);
         }
 
@@ -104,11 +105,14 @@ namespace PlanBee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetDataList(IN_coreCurves, coreCrvs);
+                    bool coreReceived = DA.GetDataList(IN_coreCurves, coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    if(coreReceived)
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    else
+                        _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
 
 
                     Task<SolveResults> task = Task.Run(() => ComputeNeighborhoodSize(_plan), CancelToken);
@@ -124,11 +128,15 @@ namespace PlanBee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurves, ref coreCrvs);
+                    bool coreReceived = DA.GetData(IN_coreCurves, ref coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    if (coreReceived)
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    else
+                        _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
+
                     result = ComputeNeighborhoodSize(_plan);
                     _plan = result.Value;
 
