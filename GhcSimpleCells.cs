@@ -68,6 +68,9 @@ namespace PlanBee
             DA.GetDataList(IN_coreCurves, coreCrvs);
             DA.GetData(IN_resolution, ref _resolution);
 
+            if (_resolution < 1.0)
+                _resolution = 1.0;
+
             SmartPlan _plan;
 
             try

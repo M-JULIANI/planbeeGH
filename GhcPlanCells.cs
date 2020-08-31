@@ -92,6 +92,10 @@ namespace Planbee
             List<Curve> coreCrvs = new List<Curve>();
             DA.GetDataList(IN_coreCurves, coreCrvs);
             DA.GetData(IN_resolution, ref _resolution);
+
+            if (_resolution < 1.0)
+                _resolution = 1.0;
+
             bool successLease = DA.GetData(IN_leaseSpan, ref leaseSpan);
 
             SmartPlan _plan;
