@@ -86,6 +86,14 @@ namespace Planbee
                         .GroupBy(x => x.inx / maxItems)
                         .Select(g => g.Select(x => x.item));
         }
+
+        public static int FactorialR(int inputVal)
+        {
+            if (inputVal == 1)
+                return inputVal;
+            else
+                return inputVal * FactorialR(inputVal - 1);
+        }
     }
 
 }
