@@ -30,7 +30,6 @@ namespace Planbee
         int IN_plane;
         int IN_AutoColor;
         int IN_perimCurve;
-        int IN_coreCurves;
         int IN_rects;
 
         int OUT_perimeterMetric;
@@ -47,7 +46,6 @@ namespace Planbee
             pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extent of the core boundaries", GH_ParamAccess.list);
 
         }
 
@@ -67,7 +65,6 @@ namespace Planbee
         {
 
             Curve perimeter = null;
-            List<Curve> coreCrvs = new List<Curve>();
             Plane plane = Plane.Unset;
 
             rectangles = new List<Rectangle3d>();
@@ -75,16 +72,13 @@ namespace Planbee
             if (!DA.GetData(IN_plane, ref plane)) return;
             if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
             if (!DA.GetData(IN_perimCurve, ref perimeter)) return;
-            if (!DA.GetDataList(IN_coreCurves, coreCrvs)) return;
             if (!DA.GetDataList(IN_rects, rectangles)) return;
 
             try
             {
-                _plan = new SmartPlan(perimeter, coreCrvs, rectangles, plane);
+                _plan = new SmartPlan(perimeter, rectangles, plane);
                 _plan.ComputeDistToPerimeter();
-
                 perimeterDist = _plan.getPerimDistances();
-
                 DA.SetDataList(OUT_perimeterMetric, perimeterDist);
             }
             catch (Exception e)

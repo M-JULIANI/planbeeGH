@@ -265,18 +265,13 @@ namespace Planbee
         }
 
         //distance to perimeter constructor
-        public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, Plane plane)
+        public SmartPlan(Curve perimCurve, List<Rectangle3d> rectangles, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
             project = Transform.PlanarProjection(_plane);
 
             this._resolution = Math.Sqrt(rectangles[0].Area);
-            exitCells = new SmartCell[0];
-
             this.perimCurve = perimCurve;
-            _coreCurves = new Curve[coreCurves.Count];
-            for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = coreCurves[i];
 
             cells = new Dictionary<Vector2dInt, SmartCell>();
 
