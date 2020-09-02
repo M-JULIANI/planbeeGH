@@ -1239,30 +1239,22 @@ namespace PlanBee
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
-                double distance = 0.0;
-                double minDist = 100000000;
                 for (int j = 0; j < exitCells.Length; j++)
                 {
                     localPath = new Polyline();
                     var steps = FindPath(cell.Value, exitCells[j]);
+                    allTheCells.AddRange(steps.Select(s => s.index));
 
                     localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
                     for (int i = 0; i < steps.Count; i++)
                     {
-                        double dist = double.NaN;
-                        if (i == 0)
-                            dist = (cell.Value.location - steps[i].location).Length;
-                        else
-                            dist = (steps[i].location - steps[i - 1].location).Length;
-
-                        distance += dist;
-
                         localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
                         if (i == steps.Count - 1)
                             pathCurves.Add(localPath, new GH_Path(count));
                     }
 
                 }
+                count++;
             }
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> c in cells)
@@ -1275,11 +1267,9 @@ namespace PlanBee
                         c.Value.metric4++;
 
                 if (c.Value.metric4 < min)
-                    min = c.Value.metric4;
+                    min = 0;
                 if (c.Value.metric4 > max)
                     max = c.Value.metric4;
-
-                count++;
             }
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
@@ -1345,8 +1335,6 @@ namespace PlanBee
                     min = c.Value.metric4;
                 if (c.Value.metric4 > max)
                     max = c.Value.metric4;
-
-                count++;
             }
 
 

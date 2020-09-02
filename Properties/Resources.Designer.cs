@@ -183,6 +183,26 @@ namespace PlanBee.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ExitPaths_01 {
+            get {
+                object obj = ResourceManager.GetObject("ExitPaths_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ExitPaths_Frequency_01 {
+            get {
+                object obj = ResourceManager.GetObject("ExitPaths_Frequency_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap GA_01 {
             get {
                 object obj = ResourceManager.GetObject("GA_01", resourceCulture);

@@ -203,6 +203,15 @@
   <ItemGroup>
     <None Include="Icons\BetweenPaths-01.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\ExitPaths-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\ExitPaths-blurred-01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\ExitPaths_Frequency-01.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

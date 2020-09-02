@@ -107,7 +107,11 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
                     DA.GetDataList(IN_exitPts, exitPts);
 
-                    _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+                    if (interiorPartitions.Count == 0 || interiorPartitions == null)
+                        _plan = new SmartPlan(rectangles, exitPts, plane);
+                    else
+                        _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+
                     result = ComputeExit(_plan);
                     _plan = result.Value;
                 }
@@ -149,7 +153,7 @@ namespace PlanBee
         {
             get
             {
-                return PlanBee.Properties.Resources.Paths;
+                return PlanBee.Properties.Resources.ExitPaths_01;
             }
         }
 
