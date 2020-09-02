@@ -474,9 +474,13 @@ namespace Planbee
             }
 
             this.perimCurve = perimCurve;
-            _coreCurves = new Curve[coreCurves.Count];
-            for (int i = 0; i < _coreCurves.Length; i++)
-                _coreCurves[i] = coreCurves[i];
+
+            if (coreCurves.Count > 0)
+            {
+                _coreCurves = new Curve[coreCurves.Count];
+                for (int i = 0; i < _coreCurves.Length; i++)
+                    _coreCurves[i] = coreCurves[i];
+            }
 
             cells = new Dictionary<Vector2dInt, SmartCell>();
 
@@ -1077,7 +1081,12 @@ namespace Planbee
 
                 testLines = new DataTree<Line>();
 
-                Mesh[] obstMeshExtrusions = new Mesh[obstCrvs.Length + _coreCurves.Length];
+                Mesh[] obstMeshExtrusions;
+                if (_coreCurves != null)
+                    obstMeshExtrusions = new Mesh[obstCrvs.Length + _coreCurves.Length];
+                else
+                    obstMeshExtrusions = new Mesh[obstCrvs.Length];
+
                 Mesh[] attrMeshExtrusions = new Mesh[attrCrvs.Length];
 
                 Surface srfExtrusion;

@@ -15,7 +15,7 @@ namespace PlanBee
         bool autoColor = false;
         SmartPlan _plan;
         List<Rectangle3d> rectangles = new List<Rectangle3d>();
-        System.Drawing.Color[] gradientList;
+        //System.Drawing.Color[] gradientList;
         double[] clusterCoeff;
 
         /// <summary>

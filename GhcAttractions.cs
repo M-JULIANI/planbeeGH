@@ -56,9 +56,11 @@ namespace Planbee
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describes the extent of the core boundaries", GH_ParamAccess.list);
+            pManager[IN_coreCurves].Optional = true;
             IN_partitions = pManager.AddCurveParameter("Partition Curves", "Partitions", "Polylines describing partitions", GH_ParamAccess.list);
             IN_attCrvs = pManager.AddCurveParameter("Attractor Curves", "Attractors", "Attractor curves describing the boundaries of building profiles that are of interest - attractors", GH_ParamAccess.list);
             IN_obstCrvs = pManager.AddCurveParameter("Obstacle Curves", "Obstacles", "Obstacles blocking the view of attractor buildings/profiles", GH_ParamAccess.list);
+            pManager[IN_obstCrvs].Optional = true;
         }
 
         /// <summary>
