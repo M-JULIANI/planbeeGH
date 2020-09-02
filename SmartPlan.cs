@@ -52,6 +52,7 @@ namespace Planbee
         Plane _plane;
         Transform project;
 
+
         public SmartPlan(Curve perimCurve, double leaseSpan, double _resolution, List<Point3d> ExitPts, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
@@ -445,6 +446,8 @@ namespace Planbee
             AssignExitCells(exitPoints);
             AssignInactiveCells();
         }
+
+
 
         //attractor viz constructor
         public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, List<Curve> interiorPartitions, List<Curve> attractorCrvs, List<Curve> obstacleCrvs, Plane plane)
@@ -1181,6 +1184,7 @@ namespace Planbee
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 double distance = 0.0;
+                double minDist = 100000000;
                 for (int j = 0; j < exitCells.Length; j++)
                 {
                     localPath = new Polyline();
@@ -1189,26 +1193,100 @@ namespace Planbee
                     localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
                     for (int i = 0; i < steps.Count; i++)
                     {
+                        double dist = double.NaN;
                         if (i == 0)
-                            distance += (cell.Value.location - steps[i].location).Length;
-
+                            dist = (cell.Value.location - steps[i].location).Length;
                         else
-                            distance += (steps[i].location - steps[i - 1].location).Length;
+                            dist = (steps[i].location - steps[i - 1].location).Length;
+
+                        distance += dist;
 
                         localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
                         if (i == steps.Count - 1)
                             pathCurves.Add(localPath, new GH_Path(count));
                     }
+
+                    if (distance < minDist)
+                        minDist = distance;
                 }
 
-                cell.Value.metric4 = distance;
-                if (distance < min)
-                    min = distance;
-                if (distance > max)
-                    max = distance;
+                cell.Value.metric4 = minDist;
+                if (minDist < min)
+                    min = minDist;
+                if (minDist > max)
+                    max = minDist;
 
                 count++;
             }
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            {
+                var holder = PBUtilities.mapValue(cell.Value.metric4, min, max, 0.00, 1.00);
+                var final = 1.0 - holder;
+                cell.Value.metric4 = final;
+            }
+        }
+
+        public void ComputeBetweenPaths()
+        {
+            pathCurves = new DataTree<Polyline>();
+
+            var min = 1000000.0;
+            var max = -1.0;
+            int count = 0;
+            Polyline localPath;
+
+            List<Vector2dInt> allTheCells = new List<Vector2dInt>();
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            {
+                double distance = 0.0;
+                if (exitCells.Contains(cell.Value))
+                {
+                    for (int j = 0; j < exitCells.Length; j++)
+                    {
+                        if (cell.Value.index != exitCells[j].index)
+                        {
+                            localPath = new Polyline();
+                            var steps = FindPath(cell.Value, exitCells[j]);
+                            allTheCells.AddRange(steps.Select(s => s.index));
+
+                            localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
+                            for (int i = 0; i < steps.Count; i++)
+                            {
+                                if (i == 0)
+                                    distance += (cell.Value.location - steps[i].location).Length;
+
+                                else
+                                    distance += (steps[i].location - steps[i - 1].location).Length;
+
+                                localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
+                                if (i == steps.Count - 1)
+                                    pathCurves.Add(localPath, new GH_Path(count));
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> c in cells)
+                c.Value.metric4 = 0.0;
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> c in cells)
+            {
+                for (int j = 0; j < allTheCells.Count; j++)
+                    if (c.Key == allTheCells[j])
+                        c.Value.metric4++;
+
+                if (c.Value.metric4 < min)
+                    min = c.Value.metric4;
+                if (c.Value.metric4 > max)
+                    max = c.Value.metric4;
+
+                count++;
+            }
+
+
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
