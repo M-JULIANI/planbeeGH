@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
-using Planbee;
 
 namespace PlanBee
 {

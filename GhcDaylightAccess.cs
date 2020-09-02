@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Threading.Tasks;
 using Rhino.Display;
 
-namespace Planbee
+namespace PlanBee
 {
     public class GhcDaylightAccess : GH_TaskCapableComponent<GhcDaylightAccess.SolveResults>
     {

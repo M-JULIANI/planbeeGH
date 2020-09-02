@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Display;
 
-namespace Planbee
+namespace PlanBee
 {
     public class GhcPerimeterDistance : GH_Component
     {

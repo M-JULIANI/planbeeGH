@@ -1,29 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Display;
-using Rhino.DocObjects;
-
-using System.IO;
-using System.Linq;
-using System.Data;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
 using System.Threading.Tasks;
 
 
-namespace Planbee
+namespace PlanBee
 {
     public class GhcIsovist : GH_TaskCapableComponent<GhcIsovist.SolveResults>
     {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using Planbee;
 using Rhino.Geometry;
 
 namespace PlanBee

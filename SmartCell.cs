@@ -1,30 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using Grasshopper.Kernel;
 using Rhino.Geometry;
-using System.IO;
-using System.Linq;
-using System.Data;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 
-using Rhino.DocObjects;
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
 
-using Grasshopper;
-using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
-using PlanBee;
-
-namespace Planbee
+namespace PlanBee
 {
 
     public struct Vector2dInt: IEquatable<Vector2dInt>

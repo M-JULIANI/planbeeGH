@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 using Grasshopper;
-using GH_IO;
 using Rhino.Geometry;
-using GH_IO.Serialization;
 using System.Linq;
-using Rhino.Display;
 using System.Text.RegularExpressions;
 
 
-namespace Planbee
+namespace PlanBee
 {
     public class KMap
     {

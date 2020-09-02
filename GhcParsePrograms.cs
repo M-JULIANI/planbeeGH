@@ -2,28 +2,13 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using Rhino.Geometry;
 using System.IO;
 
 using Grasshopper;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 
-using System.Linq;
-using System.Data;
-using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
 
-using Rhino.DocObjects;
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
-
-namespace Planbee
+namespace PlanBee
 {
     public class GhcParsePrograms : GH_Component
     {

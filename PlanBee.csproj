@@ -92,6 +92,7 @@
     <Compile Include="GhcSingleSpaceCells.cs" />
     <Compile Include="Ghc_BetweenPaths.cs" />
     <Compile Include="Ghc_ClusteringCoefficient.cs" />
+    <Compile Include="Ghc_ExitAccessBetween.cs" />
     <Compile Include="Ghc_MeanShortestPaths.cs" />
     <Compile Include="Ghc_MSPSampled.cs" />
     <Compile Include="Ghc_PlanBeeInfo.cs" />

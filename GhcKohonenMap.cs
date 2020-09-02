@@ -1,33 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Data;
 using Grasshopper;
 using Rhino.Geometry;
 using Rhino.Display;
-
-using Rhino.DocObjects;
-
-using System.IO;
 using System.Linq;
-using System.Data;
 using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
 using System.Threading.Tasks;
 
-namespace Planbee
+namespace PlanBee
 {
     public class GhcKohonenMap : GH_TaskCapableComponent<GhcKohonenMap.SolveResults>
     {

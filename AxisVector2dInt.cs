@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using Planbee;
+using PlanBee;
 
 namespace PlanBee
 {

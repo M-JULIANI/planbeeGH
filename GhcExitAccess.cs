@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Display;
 using System.Threading.Tasks;
-using Planbee;
 
-namespace Planbee
+namespace PlanBee
 {
     public class GhcExitAccess : GH_TaskCapableComponent<GhcExitAccess.SolveResults>
     {

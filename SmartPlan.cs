@@ -4,11 +4,10 @@ using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PlanBee;
 using QuickGraph;
 using QuickGraph.Algorithms;
 
-namespace Planbee
+namespace PlanBee
 {
     public class SmartPlan
     {
@@ -1215,6 +1214,70 @@ namespace Planbee
                     min = minDist;
                 if (minDist > max)
                     max = minDist;
+
+                count++;
+            }
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            {
+                var holder = PBUtilities.mapValue(cell.Value.metric4, min, max, 0.00, 1.00);
+                var final = 1.0 - holder;
+                cell.Value.metric4 = final;
+            }
+        }
+
+        public void ComputeExitBetweenAccess()
+        {
+            pathCurves = new DataTree<Polyline>();
+
+            var min = 1000000.0;
+            var max = -1.0;
+            int count = 0;
+            Polyline localPath;
+
+            List<Vector2dInt> allTheCells = new List<Vector2dInt>();
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            {
+                double distance = 0.0;
+                double minDist = 100000000;
+                for (int j = 0; j < exitCells.Length; j++)
+                {
+                    localPath = new Polyline();
+                    var steps = FindPath(cell.Value, exitCells[j]);
+
+                    localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
+                    for (int i = 0; i < steps.Count; i++)
+                    {
+                        double dist = double.NaN;
+                        if (i == 0)
+                            dist = (cell.Value.location - steps[i].location).Length;
+                        else
+                            dist = (steps[i].location - steps[i - 1].location).Length;
+
+                        distance += dist;
+
+                        localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
+                        if (i == steps.Count - 1)
+                            pathCurves.Add(localPath, new GH_Path(count));
+                    }
+
+                }
+            }
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> c in cells)
+                c.Value.metric4 = 0.0;
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> c in cells)
+            {
+                for (int j = 0; j < allTheCells.Count; j++)
+                    if (c.Key == allTheCells[j])
+                        c.Value.metric4++;
+
+                if (c.Value.metric4 < min)
+                    min = c.Value.metric4;
+                if (c.Value.metric4 > max)
+                    max = c.Value.metric4;
 
                 count++;
             }
