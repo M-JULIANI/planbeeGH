@@ -24,7 +24,8 @@ namespace PlanBee
         public Ghc_ClusteringCoefficient()
           : base("Clustering Coefficient", "Clustering Coefficient",
               "The clustering coefficient of of all cells. 'The clustering coefficient gives a measure of the proportion of intervisible space within the visibility neighbourhood of a point.'" +
-                "For more information refer to Alasdair Turners paper: 'From isovists to visibility graphs: a methodology for the analysis of architectural space'.",
+                "Refer to Alasdair Turner's paper:'From isovists to visibility graphs: a methodology for the analysis of architectural space' for a full definition" +
+                "of clustering coefficient.",
               "PlanBee", "Analysis")
         {
         }
@@ -46,6 +47,7 @@ namespace PlanBee
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview Isovist Metric Visualization", "Autocolor Isovist", "A built-in analysis coloring of the voxels of the plan for the isovist metric. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
+            pManager[IN_AutoColor].Optional = true;
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
             pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);

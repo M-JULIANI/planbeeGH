@@ -26,7 +26,7 @@ namespace PlanBee
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "A collection of functions used to compute various properties of floor plans with discrete units.Using the different computed properties of each " +
+                return "A collection of functions used to compute various properties of floor plans with discrete units.U sing the different computed properties of each " +
                     "floor plan voxel as well as the desired properties ascribed to each building program," +
                     "this plug-in allows users to create feature maps (using Kohonen Nets) which negotatiates the two. " +
                     "The purpose of the tool is to visualize plan/ programmatic features and to quickly generate diagrammatic floor plan layouts that expresses that feature information.";

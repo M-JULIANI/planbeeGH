@@ -42,11 +42,11 @@ namespace Planbee
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             IN_AutoColor = pManager.AddBooleanParameter("Auto preview Perimeter Metric Visualization", "Autocolor Perimeter", "A build it analysis coloring of the voxels of the plan for the perimeter metric. Make sure to have the component preview on in order to view.", GH_ParamAccess.item, false);
+            pManager[IN_AutoColor].Optional = true;
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item);
             pManager[IN_plane].Optional = true;
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-
         }
 
         /// <summary>
