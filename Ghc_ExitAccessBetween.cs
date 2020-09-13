@@ -89,7 +89,12 @@ namespace PlanBee
                     else
                         _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
 
-
+                    if (rectangles.Count * exitPts.Count > 10000)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Try either increasing the voxel resoultion or reducing the amount of exit points.. Currently" +
+                            "the computation is too large.");
+                        return;
+                    }
 
                     Task<SolveResults> task = Task.Run(() => ComputeBetweenExit(_plan), CancelToken);
                     TaskList.Add(task);
@@ -111,6 +116,13 @@ namespace PlanBee
                         _plan = new SmartPlan(rectangles, exitPts, plane);
                     else
                         _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+
+                    if (rectangles.Count * exitPts.Count > 10000)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Try either increasing the voxel resoultion or reducing the amount of exit points.. Currently" +
+                            "the computation is too large.");
+                        return;
+                    }
 
                     result = ComputeBetweenExit(_plan);
                     _plan = result.Value;

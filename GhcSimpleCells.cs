@@ -68,7 +68,7 @@ namespace PlanBee
             DA.GetData(IN_resolution, ref _resolution);
 
             if (_resolution < 1.0)
-                _resolution = 1.0;
+                _resolution = 0.5;
 
             SmartPlan _plan;
 

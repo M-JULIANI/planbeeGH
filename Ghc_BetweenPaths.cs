@@ -84,12 +84,18 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
                     if (!DA.GetDataList(IN_betweenPts, exitPts)) return;
 
+                    if (rectangles.Count * exitPts.Count > 20000)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Try either increasing the voxel resoultion or reducing the amount of exit points.. Currently" +
+                            "the computation is too large.");
+                        return;
+                    }
+
+
                     if (interiorPartitions.Count == 0 || interiorPartitions == null)
                         _plan = new SmartPlan(rectangles, exitPts, plane);
                     else
                         _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
-
-
 
                     Task<SolveResults> task = Task.Run(() => ComputeExit(_plan), CancelToken);
                     TaskList.Add(task);
@@ -107,7 +113,19 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
                     DA.GetDataList(IN_betweenPts, exitPts);
 
-                    _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+                    if (rectangles.Count * exitPts.Count > 12000)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Try either increasing the voxel resoultion or reducing the amount of exit points.. Currently" +
+                            "the computation is too large.");
+                        return;
+                    }
+
+
+                    if (interiorPartitions.Count == 0 || interiorPartitions == null)
+                        _plan = new SmartPlan(rectangles, exitPts, plane);
+                    else
+                        _plan = new SmartPlan(rectangles, interiorPartitions, exitPts, plane);
+
                     result = ComputeExit(_plan);
                     _plan = result.Value;
                 }
