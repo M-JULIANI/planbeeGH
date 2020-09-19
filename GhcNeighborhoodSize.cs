@@ -41,7 +41,7 @@ namespace PlanBee
         int OUT_rawNeighSizeMetric;
         int OUT_isovistPolys;
 
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

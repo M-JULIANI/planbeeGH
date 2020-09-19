@@ -80,6 +80,7 @@
     <Compile Include="Face.cs" />
     <Compile Include="GhcAnalysisPeriod.cs" />
     <Compile Include="GhcAttractions.cs" />
+    <Compile Include="GhcCovidAnalysis.cs" />
     <Compile Include="GhcDaylightAccess.cs" />
     <Compile Include="GhcExitAccess.cs" />
     <Compile Include="GhcIsovist.cs" />
