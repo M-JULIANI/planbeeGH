@@ -82,6 +82,7 @@ namespace PlanBee
         public double metric4; //distance to closest exit
         public double metric5; // meanshortestpath
         public double mspRaw; // meanshortestpath
+        public int covidMetric;
         public double neighSizeRaw;
         public double neighSize;
         public double tempMetric;
@@ -125,6 +126,7 @@ namespace PlanBee
             this.mspRaw = 0.0;
             this.neighSize = 0.0;
             this.neighSizeRaw = 0.0;
+            this.covidMetric = 0;
             Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
@@ -153,6 +155,7 @@ namespace PlanBee
             this.tempMetric = 0.0;
             this.neighSize = 0.0;
             this.neighSizeRaw = 0.0;
+            this.covidMetric = 0;
             Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
@@ -183,6 +186,7 @@ namespace PlanBee
             this.tempMetric = 0.0;
             this.neighSize = 0.0;
             this.neighSizeRaw = 0.0;
+            this.covidMetric = 0;
             Interval interval = new Interval(-this._resolution / 2.0, this._resolution / 2.0);
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);

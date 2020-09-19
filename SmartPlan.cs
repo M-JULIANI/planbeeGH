@@ -32,6 +32,7 @@ namespace PlanBee
         public Vector3d[] isovistDirections;
         Curve[] _partCurves;
 
+        public int projectUnits; //0 == metric, 1 == imperial
         Grid2d _grid;
         public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> _graph;
         public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
@@ -738,6 +739,16 @@ namespace PlanBee
                 if (curveArray[i].Contains(point, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
                     return true;
             return invalid;
+        }
+
+        public void ComputeCovid()
+        {
+
+        }
+
+        public Vector3d[] InitCovidVecs()
+        {
+            Vector3d[] vecs = new Vector3d[8];
         }
 
         public void ComputeSolarAccess()

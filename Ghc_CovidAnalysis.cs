@@ -1,13 +1,24 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Rhino.Display;
 
 namespace PlanBee
 {
     public class Ghc_CovidAnalysis : GH_Component
     {
+
+        bool autoColor = false;
+        SmartPlan _plan;
+        List<Rectangle3d> rectangles;
+        List<Curve> obstacleCrvs;
+        List<Curve> coreCrvs;
+        System.Drawing.Color[] gradientList;
+        int[] compromisedMetric;
+
         /// <summary>
         /// Initializes a new instance of the GhcCovidAnalysis class.
         /// </summary>
@@ -18,6 +29,12 @@ namespace PlanBee
         {
         }
 
+        int IN_plane;
+        int IN_perimCrv;
+        int IN_coreCrvs;
+        int IN_voxelRects;
+        int IN_obstacleCrvs;
+
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
@@ -25,6 +42,12 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            IN_plane = pManager.AddPlaneParameter("Plane", "Plane", "Plane describing the current floor plan", GH_ParamAccess.item, Plane.WorldXY);
+            pManager[IN_plane].Optional = true;
+            IN_perimCrv = pManager.AddCurveParameter("Perimeter Curve", "Perimeter Curve", "Perimeter Curve", GH_ParamAccess.item);
+            IN_coreCrvs = pManager.AddCurveParameter("Core Curve(s)", "Core Curve(s)", "Core Curve(s)", GH_ParamAccess.list);
+            IN_voxelRects = pManager.AddRectangleParameter("Voxels", "Voxels", "Voxels for analysis", GH_ParamAccess.list);
+            IN_obstacleCrvs = pManager.AddCurveParameter("Obstacle Curves/ Interior Partitions", "Interior Partitions", "The interior partitions/obstacle curves used to do Covid analysis", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -40,6 +63,19 @@ namespace PlanBee
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            Plane plane = Plane.WorldXY;
+            Curve perimCrv = null;
+            coreCrvs = new List<Curve>();
+            rectangles = new List<Rectangle3d>();
+            obstacleCrvs = new List<Curve>();
+
+            DA.GetData(IN_plane, ref plane);
+            DA.GetData(IN_perimCrv, ref perimCrv);
+            DA.GetDataList(IN_voxelRects, rectangles);
+            DA.GetDataList(IN_obstacleCrvs, obstacleCrvs);
+
+            _plan = new SmartPlan(perimCrv, coreCrvs, rectangles, obstacleCrvs, plane);
+            //_plan.projectUnits = this.docum
         }
 
         /// <summary>
@@ -52,6 +88,65 @@ namespace PlanBee
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
                 return null;
+            }
+        }
+        public override void DrawViewportMeshes(IGH_PreviewArgs args)
+        {
+
+            if (autoColor)
+            {
+                gradientList = new System.Drawing.Color[_plan.getCells().Count];
+                for (int i = 0; i < gradientList.Length; i++)
+                {
+                    var multiplier = compromisedMetric[i];
+
+                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    var rgb = gColor.ToArgbColor();
+                    gradientList[i] = (rgb);
+                }
+                for (int i = 0; i < rectangles.Count; i++)
+                {
+                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
+                    mat.Shine = 0.25;
+                    {
+                        var curve = rectangles[i].ToNurbsCurve();
+                        var pts = rectangles[i].ToPolyline();
+                        args.Display.DrawPolyline(pts, gradientList[i], 1);
+                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
+                        args.Display.DrawMeshShaded(mesh, mat);
+                    }
+                }
+
+            }
+        }
+
+        public override void DrawViewportWires(IGH_PreviewArgs args)
+        {
+            if (autoColor)
+            {
+                gradientList = new System.Drawing.Color[_plan.getCells().Count];
+
+                for (int i = 0; i < gradientList.Length; i++)
+                {
+                    var multiplier = compromisedMetric[i];
+
+                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    var rgb = gColor.ToArgbColor();
+                    gradientList[i] = (rgb);
+                }
+                for (int i = 0; i < rectangles.Count; i++)
+                {
+                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
+                    mat.Shine = 0.25;
+                    {
+                        var curve = rectangles[i].ToNurbsCurve();
+                        var pts = rectangles[i].ToPolyline();
+                        args.Display.DrawPolyline(pts, gradientList[i], 1);
+                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
+                        args.Display.DrawMeshShaded(mesh, mat);
+                    }
+                }
+
             }
         }
 
