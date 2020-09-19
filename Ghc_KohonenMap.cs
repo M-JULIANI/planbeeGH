@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PlanBee
 {
-    public class GhcKohonenMap : GH_TaskCapableComponent<GhcKohonenMap.SolveResults>
+    public class Ghc_KohonenMap : GH_TaskCapableComponent<Ghc_KohonenMap.SolveResults>
     {
         bool isRunning = false;
         bool run = false;
@@ -34,7 +34,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the GhcKohonenMap class.
         /// </summary>
-        public GhcKohonenMap()
+        public Ghc_KohonenMap()
           : base("Kohonen Self Organizing Feature Map", "Kohonen SOM",
               "Produced a self-organizing feature map of the voxels/ analysis grid corresponding to the floor plan",
               "PlanBee", "Solver")

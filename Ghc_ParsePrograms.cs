@@ -10,7 +10,7 @@ using Grasshopper.Kernel.Data;
 
 namespace PlanBee
 {
-    public class GhcParsePrograms : GH_Component
+    public class Ghc_ParsePrograms : GH_Component
     {
 
         string areaPath = "None yet";
@@ -19,7 +19,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the GhcParsePrograms class.
         /// </summary>
-        public GhcParsePrograms()
+        public Ghc_ParsePrograms()
           : base("Parse Program Data", "Parse",
               "Parses program data (.csv files)",
               "PlanBee", "Inputs")

@@ -5,12 +5,12 @@ using Rhino.Geometry;
 
 namespace PlanBee
 {
-    public class GhcSingleSpaceCells : GH_Component
+    public class Ghc_SingleSpaceCells : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the GhcSingleSpaceCells class.
         /// </summary>
-        public GhcSingleSpaceCells()
+        public Ghc_SingleSpaceCells()
           : base("GhcSingleSpaceCells", "Single Space Cells",
               "Single Space Cells",
               "PlanBee", "Inputs")

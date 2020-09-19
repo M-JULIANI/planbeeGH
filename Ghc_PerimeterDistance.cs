@@ -7,7 +7,7 @@ using Rhino.Display;
 
 namespace PlanBee
 {
-    public class GhcPerimeterDistance : GH_Component
+    public class Ghc_PerimeterDistance : GH_Component
     {
         bool autoColor;
         SmartPlan _plan;
@@ -19,7 +19,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the PerimeterDistance class.
         /// </summary>
-        public GhcPerimeterDistance()
+        public Ghc_PerimeterDistance()
           : base("Perimeter Distance", "Perimeter Distance",
               "A temporary metric for each plan voxel to serve as a proxy for access to daylight. Has since been superseded with 'Daylight Access' component",
               "PlanBee", "Analysis")

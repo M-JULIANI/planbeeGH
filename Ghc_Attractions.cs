@@ -9,7 +9,7 @@ namespace PlanBee
 {
    
 
-    public class GhcAttractions : GH_TaskCapableComponent<GhcAttractions.SolveResults>
+    public class Ghc_Attractions : GH_TaskCapableComponent<Ghc_Attractions.SolveResults>
     {
         bool autoColor = false;
         SmartPlan _plan;
@@ -20,7 +20,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the GhcAttractions class.
         /// </summary>
-        public GhcAttractions()
+        public Ghc_Attractions()
           : base("Attraction Visibility", "Attractions",
               "Computes the visibility to landmarks/attractions for each plan voxel",
               "PlanBee", "Analysis")

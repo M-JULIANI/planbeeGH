@@ -6,12 +6,12 @@ using Rhino.Geometry;
 
 namespace PlanBee
 {
-    public class GhcPlanCells : GH_Component
+    public class Ghc_PlanCells : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the TestSPlan class.
         /// </summary>
-        public GhcPlanCells()
+        public Ghc_PlanCells()
           : base("Plan Cells", "Cells",
               "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed",
               "PlanBee", "Inputs")

@@ -6,12 +6,12 @@ using Rhino.Geometry;
 
 namespace PlanBee
 {
-    public class GhcCovidAnalysis : GH_Component
+    public class Ghc_CovidAnalysis : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the GhcCovidAnalysis class.
         /// </summary>
-        public GhcCovidAnalysis()
+        public Ghc_CovidAnalysis()
           : base("GhcCovidAnalysis", "Nickname",
               "Description",
               "PlanBee", "Analysis")

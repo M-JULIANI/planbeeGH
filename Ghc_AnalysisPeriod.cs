@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace PlanBee
 {
-    public class GhcAnalysisPeriod : GH_TaskCapableComponent<GhcAnalysisPeriod.SolveResults>
+    public class Ghc_AnalysisPeriod : GH_TaskCapableComponent<Ghc_AnalysisPeriod.SolveResults>
     {
         /// <summary>
         /// Initializes a new instance of the GhcAnalysisPeriod class.
         /// </summary>
-        public GhcAnalysisPeriod()
+        public Ghc_AnalysisPeriod()
           : base("Daylight Analysis Period", "Analysis Period",
               "Uses Rhinocommon sun system to generate sun vectors for a specified place and period of time. Month (1-12), Time (0-24)",
               "PlanBee", "Inputs")

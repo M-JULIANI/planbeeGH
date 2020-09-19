@@ -6,12 +6,12 @@ using Rhino.Geometry;
 
 namespace PlanBee
 {
-    public class GhcSimpleCells : GH_Component
+    public class Ghc_SimpleCells : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the GhcSimpleCells class.
         /// </summary>
-        public GhcSimpleCells()
+        public Ghc_SimpleCells()
           : base("Simple Plan Cells", "Simple Cells",
               "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed." +
                 "No need for core/ partition/ area inputs.",

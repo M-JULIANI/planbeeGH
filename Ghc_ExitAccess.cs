@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PlanBee
 {
-    public class GhcExitAccess : GH_TaskCapableComponent<GhcExitAccess.SolveResults>
+    public class Ghc_ExitAccess : GH_TaskCapableComponent<Ghc_ExitAccess.SolveResults>
     {
 
         bool autoColor = false;
@@ -20,7 +20,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the GhcExitAccess class.
         /// </summary>
-        public GhcExitAccess()
+        public Ghc_ExitAccess()
           : base("Exit Paths", "Paths",
               "Computes an exit access metric for each plan voxel. The suggested use case is to compute access to exits but could be to other attraction locations on the floor plan",
               "PlanBee", "Analysis")

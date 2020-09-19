@@ -7,7 +7,7 @@ using Rhino.Display;
 
 namespace PlanBee
 {
-    public class GhcDaylightAccess : GH_TaskCapableComponent<GhcDaylightAccess.SolveResults>
+    public class Ghc_DaylightAccess : GH_TaskCapableComponent<Ghc_DaylightAccess.SolveResults>
     {
 
         bool autoColor = false;
@@ -19,7 +19,7 @@ namespace PlanBee
         /// <summary>
         /// Initializes a new instance of the GhcDaylightAccess class.
         /// </summary>
-        public GhcDaylightAccess()
+        public Ghc_DaylightAccess()
           : base("Daylight Access", "Daylight Access",
               "Computes a daylight access metric for each plan voxel for a specified period of time",
               "PlanBee", "Analysis")
