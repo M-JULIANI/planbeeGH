@@ -69,6 +69,8 @@ namespace PlanBee
 
             if (_resolution < 1.0)
                 _resolution = 0.5;
+            else if (_resolution == 2.0) //2.0 providing bugs..
+                _resolution = 2.1;
 
             SmartPlan _plan;
 
