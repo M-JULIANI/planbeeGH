@@ -75,7 +75,11 @@ namespace PlanBee
             DA.GetDataList(IN_obstacleCrvs, obstacleCrvs);
 
             _plan = new SmartPlan(perimCrv, coreCrvs, rectangles, obstacleCrvs, plane);
-            //_plan.projectUnits = this.docum
+            Rhino.RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+            Rhino.UnitSystem system = doc.ModelUnitSystem;
+            _plan.projectUnits = system.ToString() == "Meters" ? 0 : 1;
+
+
         }
 
         /// <summary>

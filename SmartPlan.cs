@@ -749,6 +749,21 @@ namespace PlanBee
         public Vector3d[] InitCovidVecs()
         {
             Vector3d[] vecs = new Vector3d[8];
+
+            //make sure plan now units whether metric or imperial, meters or feet
+            double covidLength = projectUnits == 0 ? 2.0 : 6.0;
+            double diagonalLength = Math.Sqrt(covidLength * covidLength * 0.5);
+
+            vecs[0] = new Vector3d(1 * covidLength, 0, 0);
+            vecs[1] = new Vector3d(diagonalLength, diagonalLength, 0);
+            vecs[2] = new Vector3d(0, 1 * covidLength, 0);
+            vecs[3] = new Vector3d(-diagonalLength, diagonalLength, 0);
+            vecs[4] = new Vector3d(-1 * covidLength, 0, 0);
+            vecs[5] = new Vector3d(-diagonalLength, -diagonalLength, 0);
+            vecs[6] = new Vector3d(0, -1 * covidLength, 0);
+            vecs[7] = new Vector3d(diagonalLength, -diagonalLength, 0);
+
+            return vecs;
         }
 
         public void ComputeSolarAccess()
