@@ -169,8 +169,18 @@ namespace PlanBee
         //index index of node
         public double BMUInfluence(int _index, int win, int index)
         {
-            double delta = new Point3d(nodes[win].x, nodes[win].y, 0).DistanceTo(new Point3d(nodes[index].x, nodes[index].y, 0));
-            double f = Math.Exp((-1 * Math.Pow(delta, 2)) / (2 * Math.Pow(radiusDecay[_index], 2)));
+            double delta = double.NaN;
+            double f = -1.0;
+            try
+            {
+                delta = new Point3d(nodes[win].x, nodes[win].y, 0).DistanceTo(new Point3d(nodes[index].x, nodes[index].y, 0));
+                f = Math.Exp((-1 * Math.Pow(delta, 2)) / (2 * Math.Pow(radiusDecay[_index], 2)));
+              
+            }
+            catch (Exception e)
+            {
+
+            }
             return f;
         }
 
