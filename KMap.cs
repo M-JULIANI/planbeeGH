@@ -138,7 +138,7 @@ namespace PlanBee
         {
             //
             int win = -1;
-            double minDist = cRadius * bmuMultiplier;
+            double minDist = double.MaxValue;
 
             for (int i = 0; i < nodes.Length; i++)
             {
