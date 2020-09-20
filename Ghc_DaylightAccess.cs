@@ -53,7 +53,7 @@ namespace PlanBee
             IN_rects = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "The rectangular voxels representing the analysis units of the floor plan", GH_ParamAccess.list);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
             IN_vectors = pManager.AddVectorParameter("Sun Vectors", "Sun Vectors", "The sun vectors pertaining to spcified analysis period", GH_ParamAccess.list);
-            IN_partitionC = pManager.AddCurveParameter("Partition curves", "Partitions", "Partition curves describing plan internal walls", GH_ParamAccess.list);
+            IN_partitionC = pManager.AddCurveParameter("Core & Partition curves", "Core(s) & Partitions", "Core & Partition curves describing plan internal walls", GH_ParamAccess.list);
             IN_ftoCeil = pManager.AddNumberParameter("Floor to ceiling height", "Floor to ceiling", "Floor to ceiling height for internal partition sizing", GH_ParamAccess.item);
             IN_Obstacles = pManager.AddBrepParameter("Solar Obstacle Breps", "Obstacle Breps", "External geometry (including facade elements/ roof/ ceiling/ other building geometry) that may block access to daylight. Exclude internal partitions and ceiling as that is being taken into account", GH_ParamAccess.list);
             pManager[IN_Obstacles].Optional = true;

@@ -36,7 +36,7 @@ namespace PlanBee
         {
             IN_plane = pManager.AddPlaneParameter("Base Plane", "Plane", "The base plane for the floor plan under analysis", GH_ParamAccess.item, Plane.WorldXY);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extents of the core boundaries", GH_ParamAccess.list);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curve(s)", "Core Curve(s)", "The curves that describe the extents of the core boundaries", GH_ParamAccess.list);
             IN_resolution = pManager.AddNumberParameter("Target resolution", "Resolution", "Resolution of smart plan within reasonable range. The component takes care of the subdivisions not being too high or too low.", GH_ParamAccess.item);
         }
 

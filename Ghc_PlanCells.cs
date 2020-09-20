@@ -41,7 +41,7 @@ namespace PlanBee
             pManager[1].Optional = true;
             IN_coreMode = pManager.AddIntegerParameter("Core Mode", "Mode", "0: Provide core curve , 1: Offset core using lease span. If no mode is provided a standard offset is used", GH_ParamAccess.item, 1);
             IN_perimCurve = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            IN_coreCurves = pManager.AddCurveParameter("Core Curves", "Cores", "The curves that describe the extents of the core boundaries", GH_ParamAccess.list);
+            IN_coreCurves = pManager.AddCurveParameter("Core Curve(s)", "Core Curve(s)", "The curves that describe the extents of the core boundaries", GH_ParamAccess.list);
             IN_resolution = pManager.AddNumberParameter("Target resolution", "Resolution", "Resolution of smart plan within reasonable range. The component takes care of the subdivisions not being too high or too low.", GH_ParamAccess.item);
             IN_leaseSpan = pManager.AddNumberParameter("Target lease span", "Lease span", "If a core curve is not provided, a target lease span kicks in to define a core boundary", GH_ParamAccess.item, 25);
 

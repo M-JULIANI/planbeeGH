@@ -29,6 +29,7 @@ namespace PlanBee
         {
         }
 
+        int IN_autoColor;
         int IN_plane;
         int IN_perimCrv;
         int IN_coreCrvs;
@@ -45,6 +46,8 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            IN_autoColor = pManager.AddBooleanParameter("Preview Covid compromised cells", "Autocolor", "Built in preview showing which cells are Covid compromised", GH_ParamAccess.item, false);
+            pManager[IN_autoColor].Optional = true;
             IN_plane = pManager.AddPlaneParameter("Plane", "Plane", "Plane describing the current floor plan", GH_ParamAccess.item, Plane.WorldXY);
             pManager[IN_plane].Optional = true;
             IN_perimCrv = pManager.AddCurveParameter("Perimeter Curve", "Perimeter Curve", "Perimeter Curve", GH_ParamAccess.item);
