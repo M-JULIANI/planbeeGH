@@ -79,8 +79,8 @@ namespace PlanBee
                     rectangles = new List<Rectangle3d>();
                     interiorPartitions = new List<Curve>();
 
-                    if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
-                    if (!DA.GetData(IN_plane, ref plane)) return;
+                    DA.GetData(IN_AutoColor, ref autoColor);
+                    DA.GetData(IN_plane, ref plane);
                     if (!DA.GetDataList(IN_rects, rectangles)) return;
                     DA.GetDataList(IN_partitions, interiorPartitions);
 

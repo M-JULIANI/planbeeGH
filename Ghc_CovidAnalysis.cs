@@ -23,8 +23,9 @@ namespace PlanBee
         /// Initializes a new instance of the GhcCovidAnalysis class.
         /// </summary>
         public Ghc_CovidAnalysis()
-          : base("GhcCovidAnalysis", "Nickname",
-              "Description",
+          : base("Covid Analysis", "Covid",
+              "Compute whether a given cell in the analysis grid is compromised for Covid. This is a proxy metric that is measured by shooting rays 2m in length in various directions." +
+                "If two directions which are 45 degrees apart collide against obstacle objects, the cell is considered 'compromised'.",
               "PlanBee", "Analysis")
         {
         }
@@ -76,6 +77,7 @@ namespace PlanBee
             coreCrvs = new List<Curve>();
             rectangles = new List<Rectangle3d>();
             obstacleCrvs = new List<Curve>();
+            DA.GetData(IN_autoColor, ref autoColor);
 
             DA.GetData(IN_plane, ref plane);
             DA.GetData(IN_perimCrv, ref perimCrv);

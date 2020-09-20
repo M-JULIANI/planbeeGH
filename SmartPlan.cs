@@ -1781,7 +1781,7 @@ namespace PlanBee
                         if (k == steps.Count - 1)
                             pathCurves.Add(localPath, new GH_Path(countOut));
                     }
-                    count++;
+                   count++;
                 }
                 cells1[i].metric5 = distance / count;
                 cells1[i].mspRaw = distance / count;

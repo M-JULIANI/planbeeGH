@@ -69,8 +69,8 @@ namespace PlanBee
 
             rectangles = new List<Rectangle3d>();
 
-            if (!DA.GetData(IN_plane, ref plane)) return;
-            if (!DA.GetData(IN_AutoColor, ref autoColor)) return;
+            DA.GetData(IN_plane, ref plane);
+            DA.GetData(IN_AutoColor, ref autoColor);
             if (!DA.GetData(IN_perimCurve, ref perimeter)) return;
             if (!DA.GetDataList(IN_rects, rectangles)) return;
 
