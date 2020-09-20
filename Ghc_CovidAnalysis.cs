@@ -35,6 +35,9 @@ namespace PlanBee
         int IN_voxelRects;
         int IN_obstacleCrvs;
 
+        int OUT_lines;
+        int OUT_hit;
+
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
@@ -55,6 +58,8 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            OUT_hit = pManager.AddIntegerParameter("Collisions", "Collisions", " 0 = no collision, 1 = collision", GH_ParamAccess.list);
+            OUT_lines = pManager.AddLineParameter("Collision lines", "Collision ines", "Collision lines used to determine whether a cell is compromised", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -79,6 +84,12 @@ namespace PlanBee
             Rhino.UnitSystem system = doc.ModelUnitSystem;
             _plan.projectUnits = system.ToString() == "Meters" ? 0 : 1;
 
+            _plan.ComputeCovid();
+
+            compromisedMetric = _plan.GetCovidMetric();
+
+            DA.SetDataList(OUT_hit, compromisedMetric);
+            DA.SetDataTree(OUT_lines, _plan.covidLines);
 
         }
 
@@ -91,7 +102,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.CovidComp_01;
             }
         }
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
@@ -104,7 +115,8 @@ namespace PlanBee
                 {
                     var multiplier = compromisedMetric[i];
 
-                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    Color cellCol = multiplier == 1 ? Color.Red : Color.White;
+                    var gColor = new ColorHSL(cellCol);
                     var rgb = gColor.ToArgbColor();
                     gradientList[i] = (rgb);
                 }
@@ -133,8 +145,8 @@ namespace PlanBee
                 for (int i = 0; i < gradientList.Length; i++)
                 {
                     var multiplier = compromisedMetric[i];
-
-                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    Color cellCol = multiplier == 1 ? Color.Red : Color.White;
+                    var gColor = new ColorHSL(cellCol);
                     var rgb = gColor.ToArgbColor();
                     gradientList[i] = (rgb);
                 }
@@ -161,5 +173,6 @@ namespace PlanBee
         {
             get { return new Guid("9d93d22b-00e6-4521-b7a9-fb4d9429746c"); }
         }
+
     }
 }

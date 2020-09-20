@@ -38,6 +38,10 @@ namespace PlanBee
         public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
         public IEnumerable<double> edgeLengths;
 
+        public DataTree<Line> covidLines;
+        double covidLength;
+        double diagonalLength;
+
         public Curve[] attrCrvs;
         public Curve[] obstCrvs;
         Vector3d[] _SunVecs;
@@ -632,6 +636,20 @@ namespace PlanBee
             return solar;
         }
 
+
+        public int[] GetCovidMetric()
+        {
+            var covid = new int[cells.Count];
+            int count = 0;
+            foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
+            {
+                covid[count] = _cell.Value.covidMetric;
+                count++;
+            }
+            return covid;
+        }
+
+
         public void PopulateCells()
         {
             pts = PBUtilities.getDiscontinuities(this.perimCurve);
@@ -743,6 +761,54 @@ namespace PlanBee
 
         public void ComputeCovid()
         {
+            Vector3d[] vecs = InitCovidVecs();
+            covidLines = new DataTree<Line>();
+
+            obstacleMeshJoined = new Mesh();
+
+            Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
+
+
+            for (int i = 0; i < _coreCurves.Length; i++)
+            {
+                var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
+                extr.Transform(mov);
+                obstacleMeshJoined.Append(Mesh.CreateFromSurface(extr));
+            }
+            for (int i = 0; i < _partCurves.Length; i++)
+            {
+                var extr = Extrusion.CreateExtrusion(_partCurves[i], Vector3d.ZAxis);// core extrusion
+                extr.Transform(mov);
+                obstacleMeshJoined.Append(Mesh.CreateFromSurface(extr));
+            }
+
+            var perimExtr = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis);// perim extrusion
+            perimExtr.Transform(mov);
+            obstacleMeshJoined.Append(Mesh.CreateFromSurface(perimExtr));
+
+            var cellArray = this.cells.ToArray();
+            int[] indices = Enumerable.Range(0, cellArray.Length).ToArray();
+            List<Line>[] linesOut = new List<Line>[cellArray.Length];
+            //List<int>[] indexOut = new List<int>[cellArray.Length];
+            int mode = -1;
+
+            System.Threading.Tasks.Parallel.ForEach(indices, (i) =>
+            {
+                List<int> indecesOut;
+                List<Line> lines;
+                int hits;
+                if (VoxelCollides(cellArray[i].Value.rect, vecs, this.covidLength, out indecesOut, out lines, out hits))
+                    mode = 1; //collision
+                else
+                    mode = 0; // no collision
+
+                cellArray[i].Value.covidMetric = mode;
+                //indexOut[i] = indecesOut;
+                linesOut[i] = lines;
+            });
+
+            for (int i = 0; i < linesOut.Length; i++)
+                covidLines.AddRange(linesOut[i], new GH_Path(i));
 
         }
 
@@ -751,8 +817,8 @@ namespace PlanBee
             Vector3d[] vecs = new Vector3d[8];
 
             //make sure plan now units whether metric or imperial, meters or feet
-            double covidLength = projectUnits == 0 ? 2.0 : 6.0;
-            double diagonalLength = Math.Sqrt(covidLength * covidLength * 0.5);
+            covidLength = projectUnits == 0 ? 2.0 : 6.0;
+            diagonalLength = Math.Sqrt(covidLength * covidLength * 0.5);
 
             vecs[0] = new Vector3d(1 * covidLength, 0, 0);
             vecs[1] = new Vector3d(diagonalLength, diagonalLength, 0);
@@ -764,6 +830,87 @@ namespace PlanBee
             vecs[7] = new Vector3d(diagonalLength, -diagonalLength, 0);
 
             return vecs;
+        }
+
+        //used to find the covid collisions
+        public bool VoxelCollides(Rectangle3d voxel, Vector3d[] vecs, double covidLength, out List<int> indeces, out List<Line> selectedLines, out int hits)
+        {
+            var lines = new List<Line>();
+            var pt = voxel.Center;
+            hits = 0;
+            int count = 0;
+            bool firstPassed = false;
+            int firstIndex = 0;
+            int secondIndex = 0;
+            indeces = new List<int>();
+            selectedLines = new List<Line>();
+            for (int j = 0; j < vecs.Length; j++)
+            {
+                Ray3d ray = new Ray3d(pt, vecs[j]);
+                var hit = Rhino.Geometry.Intersect.Intersection.MeshRay(obstacleMeshJoined, ray);
+                var line = new Line(pt, ray.PointAt(hit));
+                if (line.Length <= covidLength && hit > 0.0)
+                {
+                    if (firstPassed == false)
+                    {
+                        firstIndex = j;
+                        indeces.Add(j);
+                        firstPassed = true;
+                    }
+                    else
+                    {
+                        secondIndex = j;
+                        indeces.Add(j);
+
+                    }
+                    count++;
+                    lines.Add(new Line(pt, vecs[j]));
+                }
+
+                if (count >= 2)
+                {
+                    if (equivalentOddEven(indeces, lines, out selectedLines))
+                        return true;
+                }
+            }
+            hits = count;
+            return false;
+        }
+
+        //helps determine if angles that have a 45 degree separation are colliding
+        public bool equivalentOddEven(List<int> indeces, List<Line> lines, out List<Line> selLines)
+        {
+            bool approps = false;
+            var counter1 = 0;
+            var counter2 = 0;
+            selLines = new List<Line>();
+            var tempLines1 = new List<Line>();
+            var tempLines2 = new List<Line>();
+            for (int i = 0; i < indeces.Count; i++)
+            {
+                if (indeces[i] % 2 == 0)
+                {
+                    counter1++;
+                    tempLines1.Add(lines[i]);
+                }
+                else
+                {
+                    counter2++;
+                    tempLines2.Add(lines[i]);
+                }
+            }
+
+            if (counter1 > 1)
+            {
+                approps = true;
+                selLines = tempLines1;
+            }
+            else if (counter2 > 1)
+            {
+                approps = true;
+                selLines = tempLines2;
+            }
+            return approps;
         }
 
         public void ComputeSolarAccess()

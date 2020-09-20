@@ -103,46 +103,6 @@ namespace PlanBee.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap BowerBird {
-            get {
-                object obj = ResourceManager.GetObject("BowerBird", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap BowerBird100 {
-            get {
-                object obj = ResourceManager.GetObject("BowerBird100", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap BowerBird100_01 {
-            get {
-                object obj = ResourceManager.GetObject("BowerBird100_01", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap BowerBird200_01 {
-            get {
-                object obj = ResourceManager.GetObject("BowerBird200_01", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap BowerBird20png_01 {
             get {
                 object obj = ResourceManager.GetObject("BowerBird20png_01", resourceCulture);
@@ -166,6 +126,16 @@ namespace PlanBee.Properties {
         internal static System.Drawing.Bitmap CellsSingleVolume_01 {
             get {
                 object obj = ResourceManager.GetObject("CellsSingleVolume_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CovidComp_01 {
+            get {
+                object obj = ResourceManager.GetObject("CovidComp_01", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -336,16 +306,6 @@ namespace PlanBee.Properties {
         internal static System.Drawing.Bitmap SOM_01 {
             get {
                 object obj = ResourceManager.GetObject("SOM_01", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SOM_01_01 {
-            get {
-                object obj = ResourceManager.GetObject("SOM_01_01", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
