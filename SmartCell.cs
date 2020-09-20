@@ -49,7 +49,7 @@ namespace PlanBee
             if (obj.GetType().ToString() != "Vector2dInt")
                 return false;
             else
-                return Equals(obj);
+                return Equals((Vector2dInt)obj);
         }
 
         public override int GetHashCode()

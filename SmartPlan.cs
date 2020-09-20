@@ -1818,7 +1818,7 @@ namespace PlanBee
                 var pt = new Point3d(_cell.Value.location.X, _cell.Value.location.Y, 0);
                 var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
                 var output = pt.DistanceTo(meshPt.Point).ToString();
-                if (pt.DistanceTo(meshPt.Point) < _resolution * 0.75)
+                if (pt.DistanceTo(meshPt.Point) < Math.Sqrt(Math.Pow(_resolution * 0.5, 2) + Math.Pow(_resolution * 0.5, 2)))
                     _cell.Value.isActive = false;
 
             }
@@ -1832,7 +1832,7 @@ namespace PlanBee
                 var pt = new Point3d(v.location.X, v.location.Y, 0);
                 var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
                 var output = pt.DistanceTo(meshPt.Point).ToString();
-                if (pt.DistanceTo(meshPt.Point) < _resolution * 0.75)
+                if (pt.DistanceTo(meshPt.Point) < Math.Sqrt(Math.Pow(_resolution * 0.5, 2) + Math.Pow(_resolution * 0.5, 2)))
                     grid.Voxels.Remove(v.index);
             }
         }
