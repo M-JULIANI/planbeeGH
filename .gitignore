@@ -269,3 +269,6 @@ __pycache__/
 .vs/PlanBee/v15/.suo
 .vs/PlanBee/v15/.suo
 .vs/PlanBee/v15/Server/sqlite3/storage.ide-shm
+.vs/PlanBee/v15/.suo
+.vs/PlanBee/v15/Server/sqlite3/storage.ide-wal
+*.ide-wal
