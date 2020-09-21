@@ -57,6 +57,7 @@ namespace PlanBee
         Transform project;
 
 
+        #region Constructors
         public SmartPlan(Curve perimCurve, double leaseSpan, double _resolution, List<Point3d> ExitPts, Plane plane)
         {
             _plane = new Plane(plane.Origin, Vector3d.ZAxis);
@@ -347,8 +348,6 @@ namespace PlanBee
                 }
             }
 
-            //AssignInactiveCells(_grid);
-
             InitGraph();
         }
 
@@ -383,7 +382,6 @@ namespace PlanBee
                 else
                     cells.Add(_cell.index, _cell);
             }
-
             AssignInactiveCells();
         }
 
@@ -410,7 +408,6 @@ namespace PlanBee
             }
 
             AssignExitCells(exitPoints);
-            // AssignInactiveCells();
         }
 
         //shortest path constructor
@@ -450,8 +447,6 @@ namespace PlanBee
             AssignExitCells(exitPoints);
             AssignInactiveCells();
         }
-
-
 
         //attractor viz constructor
         public SmartPlan(Curve perimCurve, List<Curve> coreCurves, List<Rectangle3d> rectangles, List<Curve> interiorPartitions, List<Curve> attractorCrvs, List<Curve> obstacleCrvs, Plane plane)
@@ -513,6 +508,9 @@ namespace PlanBee
             }
         }
 
+        #endregion
+
+        #region Getters
         public List<Rectangle3d> getCells()
         {
             var rects = new List<Rectangle3d>();
@@ -648,8 +646,9 @@ namespace PlanBee
             }
             return covid;
         }
+        #endregion
 
-
+        #region Analysis Grid Generation 
         public void PopulateCells()
         {
             pts = PBUtilities.getDiscontinuities(this.perimCurve);
@@ -749,15 +748,11 @@ namespace PlanBee
                     }
                 }
         }
+        #endregion
 
-        public bool InsideCrvsGroup(Point3d point, Plane plane, Curve[] curveArray)
-        {
-            bool invalid = false;
-            for (int i = 0; i < curveArray.Length; i++)
-                if (curveArray[i].Contains(point, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
-                    return true;
-            return invalid;
-        }
+    
+
+        #region Compute functions
 
         public void ComputeCovid()
         {
@@ -812,106 +807,7 @@ namespace PlanBee
 
         }
 
-        public Vector3d[] InitCovidVecs()
-        {
-            Vector3d[] vecs = new Vector3d[8];
-
-            //make sure plan now units whether metric or imperial, meters or feet
-            covidLength = projectUnits == 0 ? 2.0 : 6.0;
-            diagonalLength = Math.Sqrt(covidLength * covidLength * 0.5);
-
-            vecs[0] = new Vector3d(1 * covidLength, 0, 0);
-            vecs[1] = new Vector3d(diagonalLength, diagonalLength, 0);
-            vecs[2] = new Vector3d(0, 1 * covidLength, 0);
-            vecs[3] = new Vector3d(-diagonalLength, diagonalLength, 0);
-            vecs[4] = new Vector3d(-1 * covidLength, 0, 0);
-            vecs[5] = new Vector3d(-diagonalLength, -diagonalLength, 0);
-            vecs[6] = new Vector3d(0, -1 * covidLength, 0);
-            vecs[7] = new Vector3d(diagonalLength, -diagonalLength, 0);
-
-            return vecs;
-        }
-
-        //used to find the covid collisions
-        public bool VoxelCollides(Rectangle3d voxel, Vector3d[] vecs, double covidLength, out List<int> indeces, out List<Line> selectedLines, out int hits)
-        {
-            var lines = new List<Line>();
-            var pt = voxel.Center;
-            hits = 0;
-            int count = 0;
-            bool firstPassed = false;
-            int firstIndex = 0;
-            int secondIndex = 0;
-            indeces = new List<int>();
-            selectedLines = new List<Line>();
-            for (int j = 0; j < vecs.Length; j++)
-            {
-                Ray3d ray = new Ray3d(pt, vecs[j]);
-                var hit = Rhino.Geometry.Intersect.Intersection.MeshRay(obstacleMeshJoined, ray);
-                var line = new Line(pt, ray.PointAt(hit));
-                if (line.Length <= covidLength && hit > 0.0)
-                {
-                    if (firstPassed == false)
-                    {
-                        firstIndex = j;
-                        indeces.Add(j);
-                        firstPassed = true;
-                    }
-                    else
-                    {
-                        secondIndex = j;
-                        indeces.Add(j);
-
-                    }
-                    count++;
-                    lines.Add(new Line(pt, vecs[j]));
-                }
-
-                if (count >= 2)
-                {
-                    if (equivalentOddEven(indeces, lines, out selectedLines))
-                        return true;
-                }
-            }
-            hits = count;
-            return false;
-        }
-
-        //helps determine if angles that have a 45 degree separation are colliding
-        public bool equivalentOddEven(List<int> indeces, List<Line> lines, out List<Line> selLines)
-        {
-            bool approps = false;
-            var counter1 = 0;
-            var counter2 = 0;
-            selLines = new List<Line>();
-            var tempLines1 = new List<Line>();
-            var tempLines2 = new List<Line>();
-            for (int i = 0; i < indeces.Count; i++)
-            {
-                if (indeces[i] % 2 == 0)
-                {
-                    counter1++;
-                    tempLines1.Add(lines[i]);
-                }
-                else
-                {
-                    counter2++;
-                    tempLines2.Add(lines[i]);
-                }
-            }
-
-            if (counter1 > 1)
-            {
-                approps = true;
-                selLines = tempLines1;
-            }
-            else if (counter2 > 1)
-            {
-                approps = true;
-                selLines = tempLines2;
-            }
-            return approps;
-        }
+      
 
         public void ComputeSolarAccess()
         {
@@ -1520,52 +1416,6 @@ namespace PlanBee
             }
         }
 
-
-        public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt> indices)
-        {
-            int stepCount = 0;
-            var vox = this._grid.GetVoxels();
-            indices = new List<Vector2dInt>();
-
-            if (_grid.Voxels.TryGetValue(endIn.index, out var end))
-            {
-                var shortest = _graph.ShortestPathsDijkstra(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
-
-                if (shortest(end, out var path))
-                {
-                    var current = start;
-                    indices.Add(current.index);
-
-                    foreach (var edge in path)
-                    {
-                        stepCount++;
-                        current = edge.GetOtherVertex(current);
-                        indices.Add(current.index);
-                    }
-                }
-            }
-            return stepCount;
-
-        }
-
-        public List<Face> GetFaces()
-        {
-            List<Face> outFaces = new List<Face>();
-            var faces = _grid.GetFaces().Where(f => f.IsActive);
-            foreach (var f in faces)
-                outFaces.Add(f);
-
-            return outFaces;
-        }
-
-        public void InitGraph()
-        {
-            var faces = GetFaces();
-            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.Voxels[0], f.Voxels[1], f));
-            edgeLengths = graphEdges.Select(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)));
-            _graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
-        }
-
         /// <summary>
         /// MSP Quickgraph implementation, ortho pathing only.
         /// </summary>
@@ -1706,44 +1556,6 @@ namespace PlanBee
             }
         }
 
-        /// <summary>
-        /// A sampling of cells used for sampeld MSP
-        /// </summary>
-        /// <param name="current"></param>
-        /// <param name="cells"></param>
-        /// <param name="numberCells"></param>
-        /// <returns></returns>
-        public List<SmartCell> SelectRandomCells(int current, SmartCell[] cells, int numberCells)
-        {
-            List<SmartCell> cellsOut = new List<SmartCell>();
-            var count = cells.Length;
-            var random = new Random(42);
-            int[] indeces = new int[numberCells];
-            var usedIndeces = new List<int>();
-            usedIndeces.Add(current);
-
-            int cellCount = 0;
-
-            while (cellCount < numberCells)
-            {
-                var randInt = random.Next(0, cells.Length);
-                if (usedIndeces.Contains(randInt))
-                    continue;
-                else
-                {
-                    indeces[cellCount] = randInt;
-                    usedIndeces.Add(randInt);
-                    cellCount++;
-                }
-            }
-
-            for (int i = 0; i < indeces.Length; i++)
-                cellsOut.Add(cells[indeces[i]]);
-
-            return cellsOut;
-
-        }
-
         //MSP Computation
         public void ComputeSampleMeanShortestPath()
         {
@@ -1781,7 +1593,7 @@ namespace PlanBee
                         if (k == steps.Count - 1)
                             pathCurves.Add(localPath, new GH_Path(countOut));
                     }
-                   count++;
+                    count++;
                 }
                 cells1[i].metric5 = distance / count;
                 cells1[i].mspRaw = distance / count;
@@ -1810,6 +1622,165 @@ namespace PlanBee
                 cell.Value.metric5 = final;
             }
         }
+
+        #endregion
+
+
+        #region Covid Funcs
+
+        public Vector3d[] InitCovidVecs()
+        {
+            Vector3d[] vecs = new Vector3d[8];
+
+            //make sure plan now units whether metric or imperial, meters or feet
+            covidLength = projectUnits == 0 ? 2.0 : 6.0;
+            diagonalLength = Math.Sqrt(covidLength * covidLength * 0.5);
+
+            vecs[0] = new Vector3d(1 * covidLength, 0, 0);
+            vecs[1] = new Vector3d(diagonalLength, diagonalLength, 0);
+            vecs[2] = new Vector3d(0, 1 * covidLength, 0);
+            vecs[3] = new Vector3d(-diagonalLength, diagonalLength, 0);
+            vecs[4] = new Vector3d(-1 * covidLength, 0, 0);
+            vecs[5] = new Vector3d(-diagonalLength, -diagonalLength, 0);
+            vecs[6] = new Vector3d(0, -1 * covidLength, 0);
+            vecs[7] = new Vector3d(diagonalLength, -diagonalLength, 0);
+
+            return vecs;
+        }
+
+        //used to find the covid collisions
+        public bool VoxelCollides(Rectangle3d voxel, Vector3d[] vecs, double covidLength, out List<int> indeces, out List<Line> selectedLines, out int hits)
+        {
+            var lines = new List<Line>();
+            var pt = voxel.Center;
+            hits = 0;
+            int count = 0;
+            bool firstPassed = false;
+            int firstIndex = 0;
+            int secondIndex = 0;
+            indeces = new List<int>();
+            selectedLines = new List<Line>();
+            for (int j = 0; j < vecs.Length; j++)
+            {
+                Ray3d ray = new Ray3d(pt, vecs[j]);
+                var hit = Rhino.Geometry.Intersect.Intersection.MeshRay(obstacleMeshJoined, ray);
+                var line = new Line(pt, ray.PointAt(hit));
+                if (line.Length <= covidLength && hit > 0.0)
+                {
+                    if (firstPassed == false)
+                    {
+                        firstIndex = j;
+                        indeces.Add(j);
+                        firstPassed = true;
+                    }
+                    else
+                    {
+                        secondIndex = j;
+                        indeces.Add(j);
+
+                    }
+                    count++;
+                    lines.Add(new Line(pt, vecs[j]));
+                }
+
+                if (count >= 2)
+                {
+                    if (equivalentOddEven(indeces, lines, out selectedLines))
+                        return true;
+                }
+            }
+            hits = count;
+            return false;
+        }
+
+        //helps determine if angles that have a 45 degree separation are colliding
+        public bool equivalentOddEven(List<int> indeces, List<Line> lines, out List<Line> selLines)
+        {
+            bool approps = false;
+            var counter1 = 0;
+            var counter2 = 0;
+            selLines = new List<Line>();
+            var tempLines1 = new List<Line>();
+            var tempLines2 = new List<Line>();
+            for (int i = 0; i < indeces.Count; i++)
+            {
+                if (indeces[i] % 2 == 0)
+                {
+                    counter1++;
+                    tempLines1.Add(lines[i]);
+                }
+                else
+                {
+                    counter2++;
+                    tempLines2.Add(lines[i]);
+                }
+            }
+
+            if (counter1 > 1)
+            {
+                approps = true;
+                selLines = tempLines1;
+            }
+            else if (counter2 > 1)
+            {
+                approps = true;
+                selLines = tempLines2;
+            }
+            return approps;
+        }
+        #endregion
+
+        #region QUickGraph Shortest Path implementation
+
+        public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt> indices)
+        {
+            int stepCount = 0;
+            var vox = this._grid.GetVoxels();
+            indices = new List<Vector2dInt>();
+
+            if (_grid.Voxels.TryGetValue(endIn.index, out var end))
+            {
+                var shortest = _graph.ShortestPathsDijkstra(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
+
+                if (shortest(end, out var path))
+                {
+                    var current = start;
+                    indices.Add(current.index);
+
+                    foreach (var edge in path)
+                    {
+                        stepCount++;
+                        current = edge.GetOtherVertex(current);
+                        indices.Add(current.index);
+                    }
+                }
+            }
+            return stepCount;
+
+        }
+
+        public List<Face> GetFaces()
+        {
+            List<Face> outFaces = new List<Face>();
+            var faces = _grid.GetFaces().Where(f => f.IsActive);
+            foreach (var f in faces)
+                outFaces.Add(f);
+
+            return outFaces;
+        }
+
+        public void InitGraph()
+        {
+            var faces = GetFaces();
+            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.Voxels[0], f.Voxels[1], f));
+            edgeLengths = graphEdges.Select(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)));
+            _graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
+        }
+
+        #endregion
+
+
+        #region ShortestPath exits related
 
         public void AssignInactiveCells()
         {
@@ -1972,6 +1943,10 @@ namespace PlanBee
 
         }
 
+        #endregion
+
+
+        #region Other Funcs
         Vector2d PlaceLocation(Rectangle3d rectangle)
         {
             return new Vector2d(rectangle.Center.X, rectangle.Center.Y);
@@ -1981,6 +1956,57 @@ namespace PlanBee
         {
             return new Vector2d(x, y);
         }
+
+        /// <summary>
+        /// A sampling of cells used for sampeld MSP
+        /// </summary>
+        /// <param name="current"></param>
+        /// <param name="cells"></param>
+        /// <param name="numberCells"></param>
+        /// <returns></returns>
+        public List<SmartCell> SelectRandomCells(int current, SmartCell[] cells, int numberCells)
+        {
+            List<SmartCell> cellsOut = new List<SmartCell>();
+            var count = cells.Length;
+            var random = new Random(42);
+            int[] indeces = new int[numberCells];
+            var usedIndeces = new List<int>();
+            usedIndeces.Add(current);
+
+            int cellCount = 0;
+
+            while (cellCount < numberCells)
+            {
+                var randInt = random.Next(0, cells.Length);
+                if (usedIndeces.Contains(randInt))
+                    continue;
+                else
+                {
+                    indeces[cellCount] = randInt;
+                    usedIndeces.Add(randInt);
+                    cellCount++;
+                }
+            }
+
+            for (int i = 0; i < indeces.Length; i++)
+                cellsOut.Add(cells[indeces[i]]);
+
+            return cellsOut;
+
+        }
+
+
+        public bool InsideCrvsGroup(Point3d point, Plane plane, Curve[] curveArray)
+        {
+            bool invalid = false;
+            for (int i = 0; i < curveArray.Length; i++)
+                if (curveArray[i].Contains(point, _plane, 0.01) == Rhino.Geometry.PointContainment.Inside)
+                    return true;
+            return invalid;
+        }
+
+        #endregion
+
     }
 }
 
