@@ -34,7 +34,7 @@ namespace PlanBee
 
         public int projectUnits; //0 == metric, 1 == imperial
         Grid2d _grid;
-        public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> _graph;
+        public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph;
         public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
         public IEnumerable<double> edgeLengths;
 
@@ -109,6 +109,11 @@ namespace PlanBee
 
             cells = new Dictionary<Vector2dInt, SmartCell>();
             PopulateCells();
+
+            ///init graph!
+            var faces = GetFaces();
+            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.SmartCells[0], f.SmartCells[1], f));
+            graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
 
         }
 
@@ -1443,7 +1448,7 @@ namespace PlanBee
                     {
                         localPath = new Polyline();
                         List<Vector2dInt> indices;
-                        var localDist = GetShortestPath(cells1[i], cells2[j], _graph, out indices);
+                        var localDist = GetShortestPath(cells1[i], cells2[j], graph, out indices);
                         distance += localDist + 0.5;
 
                         for (int s = 0; s < indices.Count; s++)
@@ -1740,7 +1745,7 @@ namespace PlanBee
 
             if (_grid.Voxels.TryGetValue(endIn.index, out var end))
             {
-                var shortest = _graph.ShortestPathsDijkstra(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
+                var shortest = this.graph.ShortestPathsDijkstra((TaggedEdge<SmartCell, Face> e) => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
 
                 if (shortest(end, out var path))
                 {
@@ -1772,9 +1777,9 @@ namespace PlanBee
         public void InitGraph()
         {
             var faces = GetFaces();
-            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.Voxels[0], f.Voxels[1], f));
+            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.SmartCells[0], f.SmartCells[1], f));
             edgeLengths = graphEdges.Select(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)));
-            _graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
+            graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
         }
 
         #endregion

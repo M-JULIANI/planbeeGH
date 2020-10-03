@@ -11,21 +11,21 @@ namespace PlanBee
     //not currently using this class
     public class Face
     {
-        public SmartCell[] Voxels => GetVoxels();
+        public SmartCell[] SmartCells => GetSmartCells();
         public Vector2dInt Index;
         public Vector2d Center;
         public PBUtilities.Axis Direction;
 
         Grid2d _grid;
 
-        public bool IsActive => Voxels.Count(v => v != null && v.isActive) == 2;
+        public bool IsActive => SmartCells.Count(v => v != null && v.isActive) == 2;
 
         public PBUtilities.BoundaryType Boundary
         {
             get
             {
-                bool left = Voxels[0]?.isActive == true;
-                bool right = Voxels[1]?.isActive == true;
+                bool left = SmartCells[0]?.isActive == true;
+                bool right = SmartCells[1]?.isActive == true;
 
                 if (!left && right) return PBUtilities.BoundaryType.Left;
                 if (left && !right) return PBUtilities.BoundaryType.Right;
@@ -95,7 +95,7 @@ namespace PlanBee
             }
         }
 
-        SmartCell[] GetVoxels()
+        SmartCell[] GetSmartCells()
         {
             int x = Index.X;
             int y = Index.Y;
