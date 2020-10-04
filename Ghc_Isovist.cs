@@ -229,16 +229,5 @@ namespace PlanBee
         {
             get { return new Guid("a3eaedb0-7217-4034-b936-d39427de8772"); }
         }
-
-        void ObjectEventHandler(object sender, EventArgs e)
-        {
-                //if (e.Objects.Where(o => o is IGH_ActiveObject).Count() > 0)
-                {
-                   // reset_Active = true;
-                    // lastChecked = DateTime.Now;
-                    this.ExpireSolution(true);
-                }
-
-        }
     }
 }

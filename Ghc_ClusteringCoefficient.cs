@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Threading.Tasks;
+using Rhino.Display;
 
 namespace PlanBee
 {
@@ -12,7 +13,7 @@ namespace PlanBee
         bool autoColor = false;
         SmartPlan _plan;
         List<Rectangle3d> rectangles = new List<Rectangle3d>();
-        //System.Drawing.Color[] gradientList;
+        System.Drawing.Color[] gradientList;
         double[] clusterCoeff;
 
         /// <summary>
@@ -36,7 +37,7 @@ namespace PlanBee
 
         int OUT_clusteringCoefficient;
 
-        public override GH_Exposure Exposure => GH_Exposure.hidden;
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -90,7 +91,7 @@ namespace PlanBee
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
 
 
-                    Task<SolveResults> task = Task.Run(() => ComputeNeighborhoodSize(_plan), CancelToken);
+                    Task<SolveResults> task = Task.Run(() => ComputeIsovist(_plan), CancelToken);
                     TaskList.Add(task);
                     return;
                 }
@@ -108,36 +109,13 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
-                    result = ComputeNeighborhoodSize(_plan);
+                    result = ComputeIsovist(_plan);
                     _plan = result.Value;
 
                 }
 
                 if (result != null)
                 {
-                    var neighborhoodSize = _plan.getNeighborhoodSizeRaw();
-                    clusterCoeff = new double [neighborhoodSize.Length];
-                    double[] remappedAreas = new double[neighborhoodSize.Length];
-
-                    double min = 100000.0;
-                    double max = -1.0;
-
-                    for (int i = 0; i < neighborhoodSize.Length; i++)
-                    {
-                        if (neighborhoodSize[i] < min)
-                            min = neighborhoodSize[i];
-                        if (neighborhoodSize[i] > max)
-                            max = neighborhoodSize[i];
-                    }
-
-                    for (int i = 0; i < remappedAreas.Length; i++)
-                    {
-                        //remapped neighborhood size values for quick factorial calc
-                        remappedAreas[i] = PBUtilities.mapValue(neighborhoodSize[i], min, max, 0.0, 20.0);
-                    }
-
-                    for (int i = 0; i < clusterCoeff.Length; i++)
-                        clusterCoeff[i] = remappedAreas[i] / PBUtilities.FactorialFor((int)Math.Round(remappedAreas[i])); // PBUtilities.FactorialR((int)Math.Round(remappedAreas[i]));
 
                     DA.SetDataList(OUT_clusteringCoefficient, clusterCoeff);
                 }
@@ -153,10 +131,10 @@ namespace PlanBee
             public SmartPlan Value { get; set; }
         }
 
-        public static SolveResults ComputeNeighborhoodSize(SmartPlan plan)
+        public static SolveResults ComputeIsovist(SmartPlan plan)
         {
             SolveResults result = new SolveResults();
-            plan.ComputeNeighSize();
+            plan.ComputeIsovist();
             result.Value = plan;
             return result;
         }
@@ -171,6 +149,66 @@ namespace PlanBee
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
                 return null;
+            }
+        }
+
+        public override void DrawViewportMeshes(IGH_PreviewArgs args)
+        {
+
+            if (autoColor)
+            {
+                gradientList = new System.Drawing.Color[_plan.getCells().Count];
+                for (int i = 0; i < gradientList.Length; i++)
+                {
+                    var multiplier = clusterCoeff[i];
+
+                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    var rgb = gColor.ToArgbColor();
+                    gradientList[i] = (rgb);
+                }
+                for (int i = 0; i < rectangles.Count; i++)
+                {
+                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
+                    mat.Shine = 0.25;
+                    {
+                        var curve = rectangles[i].ToNurbsCurve();
+                        var pts = rectangles[i].ToPolyline();
+                        args.Display.DrawPolyline(pts, gradientList[i], 1);
+                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
+                        args.Display.DrawMeshShaded(mesh, mat);
+                    }
+                }
+
+            }
+        }
+
+        public override void DrawViewportWires(IGH_PreviewArgs args)
+        {
+            if (autoColor)
+            {
+                gradientList = new System.Drawing.Color[_plan.getCells().Count];
+
+                for (int i = 0; i < gradientList.Length; i++)
+                {
+                    var multiplier = clusterCoeff[i];
+
+                    var gColor = new ColorHSL(multiplier, multiplier, 0, multiplier);
+                    var rgb = gColor.ToArgbColor();
+                    gradientList[i] = (rgb);
+                }
+                for (int i = 0; i < rectangles.Count; i++)
+                {
+                    Rhino.Display.DisplayMaterial mat = new Rhino.Display.DisplayMaterial(gradientList[i]);
+                    mat.Shine = 0.25;
+                    {
+                        var curve = rectangles[i].ToNurbsCurve();
+                        var pts = rectangles[i].ToPolyline();
+                        args.Display.DrawPolyline(pts, gradientList[i], 1);
+                        var mesh = Mesh.CreateFromPlanarBoundary(curve, Rhino.Geometry.MeshingParameters.FastRenderMesh, 0.01);
+                        args.Display.DrawMeshShaded(mesh, mat);
+                    }
+                }
+
             }
         }
 
