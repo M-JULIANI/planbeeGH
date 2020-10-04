@@ -83,6 +83,8 @@ namespace PlanBee
         public double metric4; //distance to closest exit
         public double metric5; // meanshortestpath
         public double mspRaw; // meanshortestpath
+        public double clusterRaw;
+        public double clusterRemap;
         public int covidMetric;
         public double neighSizeRaw;
         public double neighSize;
@@ -93,8 +95,7 @@ namespace PlanBee
         public Rectangle3d rect;
 
         public Polyline isoPolyline { get; set; }
-        public List<int> isovistIndeces { get; set; }
-        public int intIndex {get;set;}
+        public List<Vector2dInt> isovistIndeces { get; set; }
 
 
         Grid2d _grid;
@@ -137,7 +138,9 @@ namespace PlanBee
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
 
-            isovistIndeces = new List<int>();
+            isovistIndeces = new List<Vector2dInt>();
+            clusterRaw = 0.0;
+            clusterRemap = 0.0;
         }
 
         public SmartCell(Vector2d location, double _resolution)
@@ -168,7 +171,9 @@ namespace PlanBee
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
 
-            isovistIndeces = new List<int>();
+            isovistIndeces = new List<Vector2dInt>();
+            clusterRaw = 0.0;
+            clusterRemap = 0.0;
 
         }
 
@@ -201,7 +206,9 @@ namespace PlanBee
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
 
-            isovistIndeces = new List<int>();
+            isovistIndeces = new List<Vector2dInt>();
+            clusterRaw = 0.0;
+            clusterRemap = 0.0;
 
         }
 

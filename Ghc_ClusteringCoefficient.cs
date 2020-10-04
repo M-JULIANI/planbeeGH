@@ -15,6 +15,7 @@ namespace PlanBee
         List<Rectangle3d> rectangles = new List<Rectangle3d>();
         System.Drawing.Color[] gradientList;
         double[] clusterCoeff;
+        double[] clusterCoeffRaw;
 
         /// <summary>
         /// Initializes a new instance of the Ghc_ClusteringCoefficient class.
@@ -35,7 +36,8 @@ namespace PlanBee
         int IN_rects;
         int IN_partitions;
 
-        int OUT_clusteringCoefficient;
+        int OUT_clusteringCoefficientRemap;
+        int OUT_clusteringCoefficientRaw;
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
@@ -59,7 +61,8 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            OUT_clusteringCoefficient = pManager.AddNumberParameter("Clustering coefficient metric per voxel", "Clustering Coefficient", "The clustering coefficient of each cell", GH_ParamAccess.list);
+            OUT_clusteringCoefficientRemap = pManager.AddNumberParameter("Normalized Clustering coefficient metric per voxel", "Clustering Coefficient", "The clustering coefficient of each cell normalized.", GH_ParamAccess.list);
+            OUT_clusteringCoefficientRaw = pManager.AddNumberParameter("Clustering coefficient metric per voxel", "Clustering Coefficient Raw", "The clustering coefficient of each cell", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -91,7 +94,7 @@ namespace PlanBee
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
 
 
-                    Task<SolveResults> task = Task.Run(() => ComputeIsovist(_plan), CancelToken);
+                    Task<SolveResults> task = Task.Run(() => ComputeIsovistClustering(_plan), CancelToken);
                     TaskList.Add(task);
                     return;
                 }
@@ -109,15 +112,18 @@ namespace PlanBee
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
-                    result = ComputeIsovist(_plan);
+                    result = ComputeIsovistClustering(_plan);
                     _plan = result.Value;
 
                 }
 
                 if (result != null)
                 {
-
-                    DA.SetDataList(OUT_clusteringCoefficient, clusterCoeff);
+                    clusterCoeff = _plan.getClusterCoeff();
+                    clusterCoeffRaw = _plan.getClusterCoeffRaw();
+                    DA.SetDataList(OUT_clusteringCoefficientRaw, clusterCoeffRaw);
+                    DA.SetDataList(OUT_clusteringCoefficientRemap, clusterCoeff);
+                    
                 }
             }
             catch (Exception e)
@@ -131,10 +137,10 @@ namespace PlanBee
             public SmartPlan Value { get; set; }
         }
 
-        public static SolveResults ComputeIsovist(SmartPlan plan)
+        public static SolveResults ComputeIsovistClustering(SmartPlan plan)
         {
             SolveResults result = new SolveResults();
-            plan.ComputeIsovist();
+            plan.ComputeIsoCluteringCoeff();
             result.Value = plan;
             return result;
         }
