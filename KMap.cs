@@ -179,7 +179,7 @@ namespace PlanBee
             }
             catch (Exception e)
             {
-
+                e.ToString();
             }
             return f;
         }

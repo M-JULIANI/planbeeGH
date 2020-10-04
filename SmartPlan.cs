@@ -33,10 +33,14 @@ namespace PlanBee
         Curve[] _partCurves;
 
         public int projectUnits; //0 == metric, 1 == imperial
-        Grid2d _grid;
-        public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph;
-        public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
-        public IEnumerable<double> edgeLengths;
+
+        /// <summary>
+        /// quickgraph implementation variables
+        /// </summary>
+        //Grid2d _grid;
+        //public UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph;
+        //public IEnumerable<TaggedEdge<SmartCell, Face>> graphEdges;
+        //public IEnumerable<double> edgeLengths;
 
         public DataTree<Line> covidLines;
         double covidLength;
@@ -110,10 +114,8 @@ namespace PlanBee
             cells = new Dictionary<Vector2dInt, SmartCell>();
             PopulateCells();
 
-            ///init graph!
-            var faces = GetFaces();
-            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.SmartCells[0], f.SmartCells[1], f));
-            graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
+            //InitGraph();
+ 
 
         }
 
@@ -327,33 +329,35 @@ namespace PlanBee
 
             cells = new Dictionary<Vector2dInt, SmartCell>();
 
-            _grid = new Grid2d(_resolution);
 
-            for (int i = 0; i < rectangles.Count; i++)
-            {
-                var loc = PlaceLocation(rectangles[i]);
-                var _cell = new SmartCell(loc, this._resolution);
+            //-------------quickgraph implementation
+            //_grid = new Grid2d(_resolution);
 
-                SmartCell cellExisting;
-                if (cells.TryGetValue(_cell.index, out cellExisting))
-                    continue;
-                else
-                {
-                    var pt = new Point3d(_cell.location.X, _cell.location.Y, 0);
-                    var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
-                    var output = pt.DistanceTo(meshPt.Point).ToString();
-                    if (pt.DistanceTo(meshPt.Point) > _resolution * 0.75)
-                    {
-                        cells.Add(_cell.index, _cell);
-                        if (_grid.Voxels.TryGetValue(_cell.index, out var end))
-                            continue;
-                        else
-                            _grid.AddVoxel(loc, _cell.index, this._resolution);
-                    }
-                }
-            }
+            //for (int i = 0; i < rectangles.Count; i++)
+            //{
+            //    var loc = PlaceLocation(rectangles[i]);
+            //    var _cell = new SmartCell(loc, this._resolution);
 
-            InitGraph();
+            //    SmartCell cellExisting;
+            //    if (cells.TryGetValue(_cell.index, out cellExisting))
+            //        continue;
+            //    else
+            //    {
+            //        var pt = new Point3d(_cell.location.X, _cell.location.Y, 0);
+            //        var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
+            //        var output = pt.DistanceTo(meshPt.Point).ToString();
+            //        if (pt.DistanceTo(meshPt.Point) >  Math.Sqrt(Math.Pow(_resolution * 0.5, 2) + Math.Pow(_resolution * 0.5, 2)))
+            //        {
+            //            cells.Add(_cell.index, _cell);
+            //            if (_grid.Voxels.TryGetValue(_cell.index, out var end))
+            //                continue;
+            //            else
+            //                _grid.AddVoxel(loc, _cell.index, this._resolution);
+            //        }
+            //    }
+            //}
+
+            //InitGraph();
         }
 
         //MSP constructor
@@ -399,6 +403,18 @@ namespace PlanBee
             this._resolution = Math.Sqrt(rectangles[0].Area);
             exitCells = new SmartCell[exitPoints.Count];
 
+            //cells = new Dictionary<Vector2dInt, SmartCell>();
+
+            //for (int i = 0; i < rectangles.Count; i++)
+            //{
+            //    var loc = PlaceLocation(rectangles[i]);
+            //    var _cell = new SmartCell(loc, this._resolution);
+            //    SmartCell cellExisting;
+            //    if (cells.TryGetValue(_cell.index, out cellExisting))
+            //        continue;
+            //    else
+            //        cells.Add(_cell.index, _cell);
+            //}
             cells = new Dictionary<Vector2dInt, SmartCell>();
 
             for (int i = 0; i < rectangles.Count; i++)
@@ -412,7 +428,41 @@ namespace PlanBee
                     cells.Add(_cell.index, _cell);
             }
 
+
+
+
+            //----------quickgraph implementation 
+
+            //_grid = new Grid2d(_resolution);
+            //for (int i = 0; i < rectangles.Count; i++)
+            //{
+            //    var loc = PlaceLocation(rectangles[i]);
+            //    var _cell = new SmartCell(loc, this._resolution);
+
+            //    SmartCell cellExisting;
+            //    if (cells.TryGetValue(_cell.index, out cellExisting))
+            //        continue;
+            //    else
+            //    {
+            //        var pt = new Point3d(_cell.location.X, _cell.location.Y, 0);
+            //        var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
+            //        var output = pt.DistanceTo(meshPt.Point).ToString();
+            //        if (pt.DistanceTo(meshPt.Point) > Math.Sqrt(Math.Pow(_resolution * 0.5, 2) + Math.Pow(_resolution * 0.5, 2)))
+            //        {
+            //            //cells.Add(_cell.index, _cell);
+            //            if (_grid.Voxels.TryGetValue(_cell.index, out var end))
+            //                continue;
+            //            else
+            //                _grid.AddVoxel(loc, _cell.index, this._resolution);
+            //        }
+            //    }
+            //}
+            //InitGraph();
+
             AssignExitCells(exitPoints);
+            AssignInactiveCells();
+
+            
         }
 
         //shortest path constructor
@@ -449,8 +499,39 @@ namespace PlanBee
                     cells.Add(_cell.index, _cell);
             }
 
+
+            //----------quickgraph implementation 
+            //_grid = new Grid2d(_resolution);
+
+            //for (int i = 0; i < rectangles.Count; i++)
+            //{
+            //    var loc = PlaceLocation(rectangles[i]);
+            //    var _cell = new SmartCell(loc, this._resolution);
+
+            //    SmartCell cellExisting;
+            //    if (cells.TryGetValue(_cell.index, out cellExisting))
+            //        continue;
+            //    else
+            //    {
+            //        var pt = new Point3d(_cell.location.X, _cell.location.Y, 0);
+            //        var meshPt = interiorPartitionMesh.ClosestMeshPoint(pt, 1000000.0);
+            //        var output = pt.DistanceTo(meshPt.Point).ToString();
+            //        if (pt.DistanceTo(meshPt.Point) > Math.Sqrt(Math.Pow(_resolution * 0.5, 2) + Math.Pow(_resolution * 0.5, 2)))
+            //        {
+            //            //cells.Add(_cell.index, _cell);
+            //            if (_grid.Voxels.TryGetValue(_cell.index, out var end))
+            //                continue;
+            //            else
+            //                _grid.AddVoxel(loc, _cell.index, this._resolution);
+            //        }
+            //    }
+            //}
+            //InitGraph();
+
             AssignExitCells(exitPoints);
             AssignInactiveCells();
+
+          
         }
 
         //attractor viz constructor
@@ -755,7 +836,7 @@ namespace PlanBee
         }
         #endregion
 
-    
+
 
         #region Compute functions
 
@@ -812,7 +893,7 @@ namespace PlanBee
 
         }
 
-      
+
 
         public void ComputeSolarAccess()
         {
@@ -1249,55 +1330,98 @@ namespace PlanBee
         {
             pathCurves = new DataTree<Polyline>();
 
-            var min = 1000000.0;
-            var max = -1.0;
+            var min = double.MaxValue;
+            var max = double.MinValue;
             int count = 0;
             Polyline localPath;
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 double distance = 0.0;
-                double minDist = 100000000;
-                for (int j = 0; j < exitCells.Length; j++)
+                //double minDist = double.MaxValue;
+                for (int j = 0; j < exitCells.Length; j++) //target locations
                 {
                     localPath = new Polyline();
                     var steps = FindPath(cell.Value, exitCells[j]);
-
-                    localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
-                    for (int i = 0; i < steps.Count; i++)
+                    try
                     {
-                        double dist = double.NaN;
-                        if (i == 0)
-                            dist = (cell.Value.location - steps[i].location).Length;
-                        else
-                            dist = (steps[i].location - steps[i - 1].location).Length;
+                        ////quickgraph methdo
+                        //var shortest = graph.ShortestPathsDijkstra(_ => 1, cell.Value);
 
-                        distance += dist;
+                        //if (_grid.Voxels.TryGetValue(exitCells[j].index, out var end))
+                        //{
+                        //    if (shortest(end, out var path))
+                        //    {
+                        //        var pathArray = path.ToArray();
+                        //        var current = cell.Value;
 
-                        localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
-                        if (i == steps.Count - 1)
-                            pathCurves.Add(localPath, new GH_Path(count));
+                        //        localPath.Add(new Point3d(current.location.X, current.location.Y, 0));
+                        //        for (int i = 0; i < pathArray.Length; i++)
+                        //        {
+                        //            double dist = double.NaN;
+                        //            current = pathArray[i].GetOtherVertex(current);
+                        //            localPath.Add(new Point3d(current.location.X, current.location.Y, 0));
+                        //            if (i > 0)
+                        //                dist = (current.location - pathArray[i - 1].Source.location).Length;
+                        //            distance += dist;
+                        //        }
+                        //        pathCurves.Add(localPath, new GH_Path(count));
+                        //    }
+                        //    else {
+                        //        var dumbPts = new List<Point3d>() { new Point3d(0, 0, 0), new Point3d(0, 1, 0) };
+                        //        pathCurves.Add(new Polyline(dumbPts), new GH_Path(count));
+                        //    }
+                        //}
+                        ////quickgraph methdo
+
+
+                        //other method
+                        localPath.Add(new Point3d(cell.Value.location.X, cell.Value.location.Y, 0));
+                        for (int i = 0; i < steps.Count; i++)
+                        {
+                            double dist = double.NaN;
+                            if (i == 0)
+                                dist = (cell.Value.location - steps[i].location).Length;
+                            else
+                                dist = (steps[i].location - steps[i - 1].location).Length;
+
+                            distance += dist;
+
+                            localPath.Add(new Point3d(steps[i].location.X, steps[i].location.Y, 0));
+                            if (i == steps.Count - 1)
+                                pathCurves.Add(localPath, new GH_Path(count));
+                        }
+
+                        //if (distance < minDist)
+                        //    minDist = distance;
+
                     }
-
-                    if (distance < minDist)
-                        minDist = distance;
+                    catch(Exception e)
+                    {
+                        Rhino.RhinoApp.WriteLine(e.ToString());
+                    }
                 }
 
-                cell.Value.metric4 = minDist;
-                if (minDist < min)
-                    min = minDist;
-                if (minDist > max)
-                    max = minDist;
+                cell.Value.metric4 = distance;
+                if (distance < min)
+                    min = distance;
+                if (distance > max)
+                    max = distance;
 
                 count++;
             }
 
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric4, min, max, 0.00, 1.00);
                 var final = 1.0 - holder;
                 cell.Value.metric4 = final;
             }
+
+            //foreach (KeyValuePair<Vector2dInt, SmartCell> cell in _grid.Voxels)
+            //{
+            //    cells.Add(cell.Key, cell.Value);
+            //}
         }
 
         public void ComputeExitBetweenAccess()
@@ -1424,73 +1548,73 @@ namespace PlanBee
         /// <summary>
         /// MSP Quickgraph implementation, ortho pathing only.
         /// </summary>
-        public void ComputeMSPQG()
-        {
-            pathCurves = new DataTree<Polyline>();
+        //public void ComputeMSPQG()
+        //{
+        //    pathCurves = new DataTree<Polyline>();
 
-            var min = 100000000.0;
-            var max = -1.0;
-            Polyline localPath;
-            int countOut = 0; //data tree paths, +=1 per cell
+        //    var min = 100000000.0;
+        //    var max = -1.0;
+        //    Polyline localPath;
+        //    int countOut = 0; //data tree paths, +=1 per cell
 
-            var cells1 = _grid.GetVoxels().ToArray();
-            var cells2 = _grid.GetVoxels().ToArray();
+        //    var cells1 = _grid.GetVoxels().ToArray();
+        //    var cells2 = _grid.GetVoxels().ToArray();
 
-            for (int i = 0; i < cells1.Length; i++)
-            {
-                double distance = 0.0;
-                int count = 0;
+        //    for (int i = 0; i < cells1.Length; i++)
+        //    {
+        //        double distance = 0.0;
+        //        int count = 0;
 
-                for (int j = 0; j < cells2.Length; j++)
-                {
-                    if (i == j) continue;
-                    else
-                    {
-                        localPath = new Polyline();
-                        List<Vector2dInt> indices;
-                        var localDist = GetShortestPath(cells1[i], cells2[j], graph, out indices);
-                        distance += localDist + 0.5;
+        //        for (int j = 0; j < cells2.Length; j++)
+        //        {
+        //            if (i == j) continue;
+        //            else
+        //            {
+        //                localPath = new Polyline();
+        //                List<Vector2dInt> indices;
+        //                var localDist = GetShortestPath(cells1[i], cells2[j], graph, out indices);
+        //                distance += localDist + 0.5;
 
-                        for (int s = 0; s < indices.Count; s++)
-                        {
-                            SmartCell locCell;
-                            if (cells.TryGetValue(indices[s], out locCell))
-                                localPath.Add(new Point3d(locCell.location.X, locCell.location.Y, 0));
+        //                for (int s = 0; s < indices.Count; s++)
+        //                {
+        //                    SmartCell locCell;
+        //                    if (cells.TryGetValue(indices[s], out locCell))
+        //                        localPath.Add(new Point3d(locCell.location.X, locCell.location.Y, 0));
 
-                            if (s == indices.Count - 1)
-                                pathCurves.Add(localPath, new GH_Path(countOut));
-                        }
-                        count++;
-                    }
-                }
-                distance *= 1.0;
-                cells1[i].metric5 = distance / count;
-                cells1[i].mspRaw = distance / count;
-                countOut++;
-            }
+        //                    if (s == indices.Count - 1)
+        //                        pathCurves.Add(localPath, new GH_Path(countOut));
+        //                }
+        //                count++;
+        //            }
+        //        }
+        //        distance *= 1.0;
+        //        cells1[i].metric5 = distance / count;
+        //        cells1[i].mspRaw = distance / count;
+        //        countOut++;
+        //    }
 
-            cells = new Dictionary<Vector2dInt, SmartCell>();
-            for (int i = 0; i < cells1.Length; i++)
-                cells.Add(cells1[i].index, cells1[i]);
+        //    cells = new Dictionary<Vector2dInt, SmartCell>();
+        //    for (int i = 0; i < cells1.Length; i++)
+        //        cells.Add(cells1[i].index, cells1[i]);
 
-            //find min and max
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-            {
-                double distance = cell.Value.metric5;
-                if (distance < min)
-                    min = distance;
-                if (distance > max)
-                    max = distance;
-            }
+        //    //find min and max
+        //    foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+        //    {
+        //        double distance = cell.Value.metric5;
+        //        if (distance < min)
+        //            min = distance;
+        //        if (distance > max)
+        //            max = distance;
+        //    }
 
-            //remap vals
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-            {
-                var holder = PBUtilities.mapValue(cell.Value.metric5, min, max, 0.00, 1.00);
-                var final = 1.0 - holder;
-                cell.Value.metric5 = final;
-            }
-        }
+        //    //remap vals
+        //    foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+        //    {
+        //        var holder = PBUtilities.mapValue(cell.Value.metric5, min, max, 0.00, 1.00);
+        //        var final = 1.0 - holder;
+        //        cell.Value.metric5 = final;
+        //    }
+        //}
 
         /// <summary>
         /// Mean Shortest Path.. Dont use with a large number of components
@@ -1737,50 +1861,50 @@ namespace PlanBee
 
         #region QUickGraph Shortest Path implementation
 
-        public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt> indices)
-        {
-            int stepCount = 0;
-            var vox = this._grid.GetVoxels();
-            indices = new List<Vector2dInt>();
+        //public int GetShortestPath(SmartCell start, SmartCell endIn, UndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>> graph, out List<Vector2dInt> indices)
+        //{
+        //    int stepCount = 0;
+        //    var vox = this._grid.GetVoxels();
+        //    indices = new List<Vector2dInt>();
 
-            if (_grid.Voxels.TryGetValue(endIn.index, out var end))
-            {
-                var shortest = this.graph.ShortestPathsDijkstra((TaggedEdge<SmartCell, Face> e) => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
+        //    if (_grid.Voxels.TryGetValue(endIn.index, out var end))
+        //    {
+        //        var shortest = this.graph.ShortestPathsDijkstra((TaggedEdge<SmartCell, Face> e) => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)), start);
 
-                if (shortest(end, out var path))
-                {
-                    var current = start;
-                    indices.Add(current.index);
+        //        if (shortest(end, out var path))
+        //        {
+        //            var current = start;
+        //            indices.Add(current.index);
 
-                    foreach (var edge in path)
-                    {
-                        stepCount++;
-                        current = edge.GetOtherVertex(current);
-                        indices.Add(current.index);
-                    }
-                }
-            }
-            return stepCount;
+        //            foreach (var edge in path)
+        //            {
+        //                stepCount++;
+        //                current = edge.GetOtherVertex(current);
+        //                indices.Add(current.index);
+        //            }
+        //        }
+        //    }
+        //    return stepCount;
 
-        }
+        //}
 
-        public List<Face> GetFaces()
-        {
-            List<Face> outFaces = new List<Face>();
-            var faces = _grid.GetFaces().Where(f => f.IsActive);
-            foreach (var f in faces)
-                outFaces.Add(f);
+        //public List<Face> GetFaces()
+        //{
+        //    List<Face> outFaces = new List<Face>();
+        //    var faces = _grid.GetFaces().Where(f => f.IsActive);
+        //    foreach (var f in faces)
+        //        outFaces.Add(f);
 
-            return outFaces;
-        }
+        //    return outFaces;
+        //}
 
-        public void InitGraph()
-        {
-            var faces = GetFaces();
-            graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.SmartCells[0], f.SmartCells[1], f));
-            edgeLengths = graphEdges.Select(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)));
-            graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
-        }
+        //public void InitGraph()
+        //{
+        //    var faces = GetFaces();
+        //    graphEdges = faces.Select(f => new TaggedEdge<SmartCell, Face>(f.SmartCells[0], f.SmartCells[1], f));
+        //    edgeLengths = graphEdges.Select(e => new Point3d(e.Source.location.X, e.Source.location.Y, 0).DistanceTo(new Point3d(e.Target.location.X, e.Target.location.Y, 0)));
+        //    graph = graphEdges.ToUndirectedGraph<SmartCell, TaggedEdge<SmartCell, Face>>();
+        //}
 
         #endregion
 
@@ -1928,7 +2052,6 @@ namespace PlanBee
             SmartCell eCell;
             var c = new SmartCell[cells.Count];
             int count = 0;
-            double[] distances = new double[cells.Count];
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
                 _cell.Value.tempMetric = 0.0;

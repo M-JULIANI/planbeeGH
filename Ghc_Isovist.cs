@@ -17,7 +17,7 @@ namespace PlanBee
         System.Drawing.Color[] gradientList;
         double[] iso;
 
-        GH_Document doc;
+        //GH_Document doc;
 
         /// <summary>
         /// Initializes a new instance of the GhcIsovist class.

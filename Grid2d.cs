@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using QuickGraph;
+using QuickGraph.Algorithms;
+
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Linq;
@@ -45,7 +48,6 @@ namespace PlanBee
                   new AxisVector2dInt(PBUtilities.Axis.X, x + 1, y),
                   new AxisVector2dInt(PBUtilities.Axis.Y, x, y - 1),
                   new AxisVector2dInt(PBUtilities.Axis.Y, x, y + 1),
-              
                 };
 
             foreach (var i in indices)
