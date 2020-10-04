@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Rhino.Geometry;
 
 
@@ -91,6 +92,10 @@ namespace PlanBee
         public double _resolution;
         public Rectangle3d rect;
 
+        public Polyline isoPolyline { get; set; }
+        public List<int> isovistIndeces { get; set; }
+        public int intIndex {get;set;}
+
 
         Grid2d _grid;
 
@@ -131,6 +136,8 @@ namespace PlanBee
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
+
+            isovistIndeces = new List<int>();
         }
 
         public SmartCell(Vector2d location, double _resolution)
@@ -160,6 +167,8 @@ namespace PlanBee
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
+
+            isovistIndeces = new List<int>();
 
         }
 
@@ -191,6 +200,8 @@ namespace PlanBee
             Plane plane = new Plane(new Point3d(location.X, location.Y, 0), Vector3d.ZAxis);
             rect = new Rectangle3d(plane, interval, interval);
             isActive = true;
+
+            isovistIndeces = new List<int>();
 
         }
 
