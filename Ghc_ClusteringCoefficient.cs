@@ -83,15 +83,17 @@ namespace PlanBee
                     rectangles = new List<Rectangle3d>();
                     interiorPartitions = new List<Curve>();
 
-                    // DA.GetData(IN_reset, ref iReset);
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetDataList(IN_coreCurves, coreCrvs);
+                    bool coreReceived =  DA.GetDataList(IN_coreCurves, coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    if (coreReceived)
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    else
+                        _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
 
 
                     Task<SolveResults> task = Task.Run(() => ComputeIsovistClustering(_plan), CancelToken);
@@ -107,11 +109,15 @@ namespace PlanBee
                     DA.GetData(IN_AutoColor, ref autoColor);
                     DA.GetData(IN_plane, ref plane);
                     DA.GetData(IN_perimCurve, ref perimeter);
-                    DA.GetData(IN_coreCurves, ref coreCrvs);
+                    bool coreReceived = DA.GetData(IN_coreCurves, ref coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
-                    _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    if (coreReceived)
+                        _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
+                    else
+                        _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
+
                     result = ComputeIsovistClustering(_plan);
                     _plan = result.Value;
 

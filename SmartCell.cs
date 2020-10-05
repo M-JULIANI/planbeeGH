@@ -139,8 +139,9 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
-            clusterRaw = 0.0;
-            clusterRemap = 0.0;
+            this.clusterRaw = 0.0;
+            this.clusterRemap = 0.0;
+            isoPolyline = new Polyline();
         }
 
         public SmartCell(Vector2d location, double _resolution)
@@ -172,8 +173,9 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
-            clusterRaw = 0.0;
-            clusterRemap = 0.0;
+            this.clusterRaw = 0.0;
+            this.clusterRemap = 0.0;
+            isoPolyline = new Polyline();
 
         }
 
@@ -207,8 +209,9 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
-            clusterRaw = 0.0;
-            clusterRemap = 0.0;
+            this.clusterRaw = 0.0;
+            this.clusterRemap = 0.0;
+            isoPolyline = new Polyline();
 
         }
 
