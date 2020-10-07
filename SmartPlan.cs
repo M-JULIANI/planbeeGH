@@ -1360,11 +1360,12 @@ namespace PlanBee
                             if (isoKeyList.Contains(cell.Key))
                             {
                                 var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
+                                Rhino.RhinoApp.WriteLine("Intersection count: " + intersect.Count());
                                 Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
                                 setDiffSum += intersect.Count();
                             }
                             else
-                                setDiffSum += 2;
+                                setDiffSum += 2.0;
                         }
                     }
 
