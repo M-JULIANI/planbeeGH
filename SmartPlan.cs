@@ -1225,8 +1225,6 @@ namespace PlanBee
 
         public void ComputeIsoCluteringCoeff()
         {
-            try
-            {
                 Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
                 isoPolylines = new Polyline[cells.Count];
 
@@ -1257,9 +1255,7 @@ namespace PlanBee
                 }
 
                 meshOutline = Mesh.CreateFromSurface(extrPerimeter);
-                var min = 1000000.0;
-                var max = -1.0;
-
+ 
                 int count = 0;
 
                 foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
@@ -1325,11 +1321,11 @@ namespace PlanBee
                         }
                     }
 
-                    cell.Value.metric1 = interSum;
-                    if (interSum < min)
-                        min = interSum;
-                    if (interSum > max)
-                        max = interSum;
+                    //cell.Value.metric1 = interSum;
+                    //if (interSum < min)
+                    //    min = interSum;
+                    //if (interSum > max)
+                    //    max = interSum;
 
                     poly.Add(memPt);
                     isoPolylines[count] = poly;
@@ -1337,60 +1333,77 @@ namespace PlanBee
                     count++;
                 }
 
-                //for each cell, find the indeces of all other cells included in their isovist
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-                    foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
-                        if (cell.Key != cella.Key)
-                            if (cell.Value.isoPolyline.ToNurbsCurve().Contains(new Point3d(cella.Value.location.X, cella.Value.location.Y, 0), _plane, 0.01) ==PointContainment.Inside)
-                                cell.Value.isovistIndeces.Add(cella.Key);
 
-                min = double.MaxValue;
-                max = double.MinValue;
+            var min = 1000000.0;
+            var max = -1.0;
 
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-                {
-                    double setDiffSum = 0;
-
-                    foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+            //for each cell, find the indeces of all other cells included in their isovist
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+                foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+                    if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
                     {
-                        if (cell.Key != cella.Key)
-                        {
-                            var isoKeyList = cella.Value.isovistIndeces;
+                        var nurbsCrv = cell.Value.isoPolyline.ToNurbsCurve();
 
-                            if (isoKeyList.Contains(cell.Key))
+                        if (nurbsCrv != null)
+                        {
+                            if (nurbsCrv.Contains(new Point3d(cella.Value.location.X, cella.Value.location.Y, 0), _plane, 0.01) == PointContainment.Inside)
                             {
-                                var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
-                                Rhino.RhinoApp.WriteLine("Intersection count: " + intersect.Count());
-                                Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
-                                setDiffSum += intersect.Count();
+                               // Rhino.RhinoApp.WriteLine("This is is inside a curve: " + cella.Key.ToString());
+                                cell.Value.isovistIndeces.Add(cella.Key);
                             }
-                            else
-                                setDiffSum += 2.0;
                         }
                     }
 
-                    setDiffSum /= (cells.Count - 1 * 1.0);
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            {
+                double setDiffSum = 0;
+                //Rhino.RhinoApp.WriteLine(string.Format("Number of cells in this iso is {0}", cell.Value.isovistIndeces.Count));
 
-                    var coeff = cell.Value.isovistIndeces.Count() / setDiffSum;
-                    cell.Value.clusterRaw = coeff;
+                foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+                {
+                    if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
+                    {
+                        var isoKeyList = cella.Value.isovistIndeces;
 
-                    if (coeff < min)
-                        min = coeff;
-                    if (coeff > max)
-                        max = coeff;
+                        if (isoKeyList.Contains(cell.Key))
+                        {
+                            var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
+                            //var intersect = 10.0;
+                           // Rhino.RhinoApp.WriteLine("Intersection count: " + intersect); //count
+                           //Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
+                            setDiffSum += intersect.Count(); //count
+                        }
+                    }
                 }
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+
+                setDiffSum /= (cells.Count - 1 * 1.0);
+
+                var coeff = cell.Value.isovistIndeces.Count() / setDiffSum * 1.0;
+                if (coeff == double.NaN)
+                    coeff = 0.0;
+                cell.Value.clusterRaw = coeff;
+
+               // Rhino.RhinoApp.WriteLine(cell.Value.clusterRaw.ToString()); //count
+
+                if (coeff < min)
+                    min = coeff;
+                if (coeff > max)
+                    max = coeff;
+
+          
+            }
+
+            if (min == max)
+                min = 0.0;
+
+            if (max > 1000)
+                max = 1000;
+
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
                 {
                     var holder = PBUtilities.mapValue(cell.Value.clusterRaw, min, max, 0.00, 1.00);
                     cell.Value.clusterRemap = holder;
                 }
-            }
-            catch (Exception e)
-            {
-                Rhino.RhinoApp.WriteLine(e.ToString());
-            }
-
-
         }
 
         public void ComputeDistToPerimeter()

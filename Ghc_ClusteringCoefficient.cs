@@ -94,7 +94,7 @@ namespace PlanBee
                         _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
                     else
                         _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
-
+                    Rhino.RhinoApp.WriteLine(_plan.ToString());
 
                     Task<SolveResults> task = Task.Run(() => ComputeIsovistClustering(_plan), CancelToken);
                     TaskList.Add(task);
@@ -117,6 +117,8 @@ namespace PlanBee
                         _plan = new SmartPlan(perimeter, coreCrvs, rectangles, interiorPartitions, plane);
                     else
                         _plan = new SmartPlan(perimeter, rectangles, interiorPartitions, plane);
+
+                    Rhino.RhinoApp.WriteLine(_plan.ToString());
 
                     result = ComputeIsovistClustering(_plan);
                     _plan = result.Value;
