@@ -1334,8 +1334,7 @@ namespace PlanBee
                 }
 
 
-            var min = 1000000.0;
-            var max = -1.0;
+     
 
             //for each cell, find the indeces of all other cells included in their isovist
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
@@ -1354,57 +1353,126 @@ namespace PlanBee
                         }
                     }
 
+
+            var min = 1000000.0;
+            var max = -1.0;
+
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
-                double setDiffSum = 0;
-                //Rhino.RhinoApp.WriteLine(string.Format("Number of cells in this iso is {0}", cell.Value.isovistIndeces.Count));
+                long facto = PBUtilities.factorial(cell.Value.isovistIndeces.Count);
 
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+                int counter = 0;
+                for (int i = 0; i < cell.Value.isovistIndeces.Count; i++)
                 {
-                    if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
+                    for (int j= 0; j < cell.Value.isovistIndeces.Count; j++)
                     {
-                        var isoKeyList = cella.Value.isovistIndeces;
-
-                        if (isoKeyList.Contains(cell.Key))
+                        if(i!=j)
                         {
-                            var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
-                            //var intersect = 10.0;
-                           // Rhino.RhinoApp.WriteLine("Intersection count: " + intersect); //count
-                           //Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
-                            setDiffSum += intersect.Count(); //count
+                            SmartCell c1;
+                            SmartCell c2;
+                            bool b1 = cells.TryGetValue(cell.Value.isovistIndeces[i], out c1);
+                            bool b2 = cells.TryGetValue(cell.Value.isovistIndeces[j], out c2);
+
+                            if(b1 == true && b2 == true)
+                            {
+                                if (CheckVizFromOneCellToAnother(c1, c2))
+                                    counter++;
+                            }
+
+                            
                         }
                     }
                 }
 
-                setDiffSum /= (cells.Count - 1 * 1.0);
 
-                var coeff = cell.Value.isovistIndeces.Count() / setDiffSum * 1.0;
-                if (coeff > 20.0)
-                    coeff = 20.0;
-                if (coeff == double.NaN)
-                    coeff = 0.0;
+                var coeff = counter / (facto * 1.0);
                 cell.Value.clusterRaw = coeff;
-
-               // Rhino.RhinoApp.WriteLine(cell.Value.clusterRaw.ToString()); //count
 
                 if (coeff < min)
                     min = coeff;
                 if (coeff > max)
                     max = coeff;
 
-          
             }
 
             if (min == max)
                 min = 0.0;
 
-       
+
+            //foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            //{
+            //    double setDiffSum = 0;
+            //    //Rhino.RhinoApp.WriteLine(string.Format("Number of cells in this iso is {0}", cell.Value.isovistIndeces.Count));
+
+            //    foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+            //    {
+            //        if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
+            //        {
+            //            var isoKeyList = cella.Value.isovistIndeces;
+
+            //            if (isoKeyList.Contains(cell.Key))
+            //            {
+            //                var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
+            //                //var intersect = 10.0;
+            //               // Rhino.RhinoApp.WriteLine("Intersection count: " + intersect); //count
+            //               //Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
+            //                setDiffSum += intersect.Count(); //count
+            //            }
+            //        }
+            //    }
+
+            //    setDiffSum /= (cells.Count - 1 * 1.0);
+
+            //    var coeff = cell.Value.isovistIndeces.Count() / setDiffSum * 1.0;
+            //    if (coeff > 20.0)
+            //        coeff = 20.0;
+            //    if (coeff == double.NaN)
+            //        coeff = 0.0;
+            //    cell.Value.clusterRaw = coeff;
+
+            //   // Rhino.RhinoApp.WriteLine(cell.Value.clusterRaw.ToString()); //count
+
+
+
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
                 {
                     var holder = PBUtilities.mapValue(cell.Value.clusterRaw, min, max, 0.00, 1.00);
                     cell.Value.clusterRemap = holder;
                 }
+        }
+
+        /// <summary>
+        /// assumes meshcore, interiorpartitionmesh, meshoutline are all not null
+        /// </summary>
+        /// <param name="cellFrom"></param>
+        /// <param name="cellTo"></param>
+        /// <returns></returns>
+
+        public bool CheckVizFromOneCellToAnother(SmartCell cellFrom, SmartCell cellTo)
+        {
+            bool visible = true;
+            Vector3d vec = new Point3d(cellTo.location.X, cellTo.location.Y, 0) - new Point3d(cellFrom.location.X, cellFrom.location.Y, 0);
+            Ray3d ray = new Ray3d(new Point3d(cellFrom.location.X, cellFrom.location.Y, 0), vec);
+
+            if (Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray) > 0.0)
+            {
+                visible = false;
+                return visible;
+
+            }
+            if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray) > 0.0)
+            {
+                visible = false;
+                return visible;
+            }
+
+            if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray) > 0.0)
+            {
+                visible = false;
+                return visible;
+            }
+            return visible;
         }
 
         public void ComputeDistToPerimeter()
