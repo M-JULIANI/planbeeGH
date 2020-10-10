@@ -1379,6 +1379,8 @@ namespace PlanBee
                 setDiffSum /= (cells.Count - 1 * 1.0);
 
                 var coeff = cell.Value.isovistIndeces.Count() / setDiffSum * 1.0;
+                if (coeff > 20.0)
+                    coeff = 20.0;
                 if (coeff == double.NaN)
                     coeff = 0.0;
                 cell.Value.clusterRaw = coeff;
@@ -1396,8 +1398,7 @@ namespace PlanBee
             if (min == max)
                 min = 0.0;
 
-            if (max > 1000)
-                max = 1000;
+       
 
             foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
                 {
