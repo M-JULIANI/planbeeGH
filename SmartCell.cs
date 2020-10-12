@@ -96,6 +96,7 @@ namespace PlanBee
 
         public Polyline isoPolyline { get; set; }
         public List<Vector2dInt> isovistIndeces { get; set; }
+        public List<Vector2dInt> rtreeIndices { get; set; }
 
 
         Grid2d _grid;
@@ -139,6 +140,7 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
+            rtreeIndices = new List<Vector2dInt>();
             this.clusterRaw = 0.0;
             this.clusterRemap = 0.0;
             isoPolyline = new Polyline();
@@ -173,6 +175,7 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
+            rtreeIndices = new List<Vector2dInt>();
             this.clusterRaw = 0.0;
             this.clusterRemap = 0.0;
             isoPolyline = new Polyline();
@@ -209,6 +212,7 @@ namespace PlanBee
             isActive = true;
 
             isovistIndeces = new List<Vector2dInt>();
+            rtreeIndices = new List<Vector2dInt>();
             this.clusterRaw = 0.0;
             this.clusterRemap = 0.0;
             isoPolyline = new Polyline();

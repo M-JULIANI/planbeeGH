@@ -133,6 +133,16 @@ namespace PlanBee.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ClusteringCoeff_01 {
+            get {
+                object obj = ResourceManager.GetObject("ClusteringCoeff_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CovidComp_01 {
             get {
                 object obj = ResourceManager.GetObject("CovidComp_01", resourceCulture);

@@ -24,7 +24,7 @@ namespace PlanBee
           : base("Clustering Coefficient", "Clustering Coefficient",
               "The clustering coefficient of of all cells. 'The clustering coefficient gives a measure of the proportion of intervisible space within the visibility neighbourhood of a point.'" +
                 "Refer to Alasdair Turner's paper:'From isovists to visibility graphs: a methodology for the analysis of architectural space' for a full definition" +
-                "of clustering coefficient.",
+                "of clustering coefficient. In a nutshell, the lower the clustering coefficient of a point in space, the higher a field of vision is lost as you move from that point.",
               "PlanBee", "Analysis")
         {
         }
@@ -88,6 +88,12 @@ namespace PlanBee
                     DA.GetData(IN_perimCurve, ref perimeter);
                     bool coreReceived =  DA.GetDataList(IN_coreCurves, coreCrvs);
                     DA.GetDataList(IN_rects, rectangles);
+
+                    if(rectangles.Count>3000)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Analysis grid contains" +
+                            " too many voxels, please keep the number of voxels coming in below 3,000");
+                    }
                     DA.GetDataList(IN_partitions, interiorPartitions);
 
                     if (coreReceived)
@@ -123,10 +129,13 @@ namespace PlanBee
                     result = ComputeIsovistClustering(_plan);
                     _plan = result.Value;
 
+                   
+
                 }
 
                 if (result != null)
                 {
+                    _plan.ComputeIsoCluteringCoeff();
                     clusterCoeff = _plan.getClusterCoeff();
                     clusterCoeffRaw = _plan.getClusterCoeffRaw();
                     DA.SetDataList(OUT_clusteringCoefficientRaw, clusterCoeffRaw);
@@ -148,7 +157,7 @@ namespace PlanBee
         public static SolveResults ComputeIsovistClustering(SmartPlan plan)
         {
             SolveResults result = new SolveResults();
-            plan.ComputeIsoCluteringCoeff();
+            plan.ComputeIsovist();
             result.Value = plan;
             return result;
         }
@@ -162,7 +171,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.ClusteringCoeff_01;
             }
         }
 

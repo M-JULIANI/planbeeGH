@@ -18,6 +18,7 @@ namespace PlanBee
         public Mesh coreMesh;
         public Point3d[] pts;
         Dictionary<Vector2dInt, SmartCell> cells;
+        public Dictionary<Vector2dInt, SmartCell> Cells { get => cells; }
         public int divsX;
         public int divsY;
         public List<string> tShoot;
@@ -31,6 +32,7 @@ namespace PlanBee
         public Polyline[] isoNeighPolylines;
         public Vector3d[] isovistDirections;
         Curve[] _partCurves;
+        RTree rTree;
 
         public int projectUnits; //0 == metric, 1 == imperial
 
@@ -115,7 +117,7 @@ namespace PlanBee
             PopulateCells();
 
             //InitGraph();
- 
+
 
         }
 
@@ -462,7 +464,7 @@ namespace PlanBee
             AssignExitCells(exitPoints);
             AssignInactiveCells();
 
-            
+
         }
 
         //shortest path constructor
@@ -531,7 +533,7 @@ namespace PlanBee
             AssignExitCells(exitPoints);
             AssignInactiveCells();
 
-          
+
         }
 
         //attractor viz constructor
@@ -1212,6 +1214,7 @@ namespace PlanBee
 
                 poly.Add(memPt);
                 isoPolylines[count] = poly;
+                cell.Value.isoPolyline = poly;
                 count++;
             }
 
@@ -1225,221 +1228,275 @@ namespace PlanBee
 
         public void ComputeIsoCluteringCoeff()
         {
-                Transform mov = Transform.Translation(-0.5 * Vector3d.ZAxis);
-                isoPolylines = new Polyline[cells.Count];
+            var cellsArray = cells.ToArray();
 
-                interiorPartitionMesh = new Mesh();
-                meshCore = new Mesh();
-
-                Extrusion[] extrusionCores;
-                if (_coreCurves != null)
-                {
-                    extrusionCores = new Extrusion[_coreCurves.Length];
-                    for (int i = 0; i < _coreCurves.Length; i++)
-                    {
-                        var extr = Extrusion.CreateExtrusion(_coreCurves[i], Vector3d.ZAxis);// core extrusion
-                        extr.Transform(mov);
-                        meshCore.Append(Mesh.CreateFromSurface(extr));
-                    }
-                }
-
-                var curveOff = this.perimCurve.Offset(_plane, -this._resolution / 2.0, 0.0001, CurveOffsetCornerStyle.Sharp);
-                var extrPerimeter = Extrusion.CreateExtrusion(this.perimCurve, Vector3d.ZAxis); // perimeter extrusion
-
-                for (int i = 0; i < _partCurves.Length; i++)
-                {
-                    var extrLocal = Extrusion.CreateExtrusion(_partCurves[i], Vector3d.ZAxis);
-                    extrLocal.Transform(mov);
-                    var meshLocal = Mesh.CreateFromSurface(extrLocal);
-                    interiorPartitionMesh.Append(meshLocal);
-                }
-
-                meshOutline = Mesh.CreateFromSurface(extrPerimeter);
- 
-                int count = 0;
-
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-                {
-                    var interSum = 0.0;
-                    Polyline poly = new Polyline();
-                    Point3d memPt = Point3d.Unset;
-                    Point3d dummyPt = new Point3d(cell.Value.location.X, cell.Value.location.Y, 0);
-
-                    if (this.perimCurve.Contains(dummyPt, _plane, 0.00001) == Rhino.Geometry.PointContainment.Outside)
-                    {
-                        double t;
-                        if (curveOff[0].ClosestPoint(dummyPt, out t))
-                            dummyPt = curveOff[0].PointAt(t);
-                    }
-
-                    bool addPt;
-                    Ray3d ray;
-                    Point3d pt;
-                    double partialLength;
-
-                    for (int i = 0; i < isovistDirections.Length; i++)
-                    {
-                        addPt = false;
-                        ray = new Ray3d(dummyPt, isovistDirections[i]);
-                        pt = Point3d.Unset;
-
-                        var pointforComp = new List<Point3d>();
-
-                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray) > 0.0)
-                        {
-                            pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray));
-                            addPt = true;
-                            pointforComp.Add(pt);
-
-                        }
-                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray) > 0.0)
-                        {
-                            pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray));
-                            addPt = true;
-                            pointforComp.Add(pt);
-                        }
-
-                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray) > 0.0)
-                        {
-                            pt = ray.PointAt(Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray));
-                            addPt = true;
-                            pointforComp.Add(pt);
-                        }
-
-                        else addPt = false;
-
-                        Point3d best;
-                        if (addPt)
-                        {
-                            best = pointforComp.OrderBy(p => p.DistanceTo(dummyPt)).ToList()[0];
-                            partialLength = best.DistanceTo(dummyPt);
-                            interSum += partialLength;
-                            poly.Add(best);
-
-                            if (i == 0)
-                                memPt = new Point3d(best.X, best.Y, best.Z);
-                        }
-                    }
-
-                    //cell.Value.metric1 = interSum;
-                    //if (interSum < min)
-                    //    min = interSum;
-                    //if (interSum > max)
-                    //    max = interSum;
-
-                    poly.Add(memPt);
-                    isoPolylines[count] = poly;
-                    cell.Value.isoPolyline = poly;
-                    count++;
-                }
-
-
-     
-
-            //for each cell, find the indeces of all other cells included in their isovist
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
-                    if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
-                    {
-                        var nurbsCrv = cell.Value.isoPolyline.ToNurbsCurve();
-
-                        if (nurbsCrv != null)
-                        {
-                            if (nurbsCrv.Contains(new Point3d(cella.Value.location.X, cella.Value.location.Y, 0), _plane, 0.01) == PointContainment.Inside)
-                            {
-                               // Rhino.RhinoApp.WriteLine("This is is inside a curve: " + cella.Key.ToString());
-                                cell.Value.isovistIndeces.Add(cella.Key);
-                            }
-                        }
-                    }
-
-
-            var min = 1000000.0;
-            var max = -1.0;
-
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            rTree = new RTree();
+            for (int i = 0; i < cellsArray.Length; i++)
             {
-                long facto = PBUtilities.factorial(cell.Value.isovistIndeces.Count);
-
-                int counter = 0;
-                for (int i = 0; i < cell.Value.isovistIndeces.Count; i++)
-                {
-                    for (int j= 0; j < cell.Value.isovistIndeces.Count; j++)
-                    {
-                        if(i!=j)
-                        {
-                            SmartCell c1;
-                            SmartCell c2;
-                            bool b1 = cells.TryGetValue(cell.Value.isovistIndeces[i], out c1);
-                            bool b2 = cells.TryGetValue(cell.Value.isovistIndeces[j], out c2);
-
-                            if(b1 == true && b2 == true)
-                            {
-                                if (CheckVizFromOneCellToAnother(c1, c2))
-                                    counter++;
-                            }
-
-                            
-                        }
-                    }
-                }
-
-
-                var coeff = counter / (facto * 1.0);
-                cell.Value.clusterRaw = coeff;
-
-                if (coeff < min)
-                    min = coeff;
-                if (coeff > max)
-                    max = coeff;
-
+                rTree.Insert(new Point3d(cellsArray[i].Value.location.X, cellsArray[i].Value.location.X, 0), i);
             }
 
-            if (min == max)
-                min = 0.0;
 
+            int[] indices = Enumerable.Range(0, cellsArray.Length).ToArray();
+
+            List<Vector2dInt>[] resultsDot = new List<Vector2dInt>[cellsArray.Length];
+            System.Threading.Tasks.Parallel.ForEach(indices, (index) =>
+            {
+                resultsDot[index] = new List<Vector2dInt>();
+                Point3d centroid = new Point3d(cellsArray[index].Value.location.X, cellsArray[index].Value.location.X, 0);
+                rTree.Search(
+                  new Sphere(centroid, 10),
+                  (sender, args) =>
+                  {
+                      int nearbyMeshIndex = args.Id;
+                      SmartCell nearbyCell = cellsArray[nearbyMeshIndex].Value;
+                      cellsArray[index].Value.rtreeIndices.Add(cellsArray[nearbyMeshIndex].Key);
+                  });
+
+                var nurbsCrv = cellsArray[index].Value.isoPolyline.ToNurbsCurve();
+                for (int j = 0; j < cellsArray[index].Value.rtreeIndices.Count; j++)
+                {
+                    if (nurbsCrv != null)
+                    {
+                        SmartCell relCell;
+                        if (cells.TryGetValue(cellsArray[index].Value.rtreeIndices[j], out relCell))
+                        {
+                            if (nurbsCrv.Contains(new Point3d(relCell.location.X, relCell.location.Y, 0), _plane, 0.01) == PointContainment.Inside)
+                            {
+                                // Rhino.RhinoApp.WriteLine("This is is inside a curve: " + cella.Key.ToString());
+                                //cellsArray[index].Value.isovistIndeces.Add(cellsArray[index].Value.rtreeIndices[j]);
+                                resultsDot[index].Add(cellsArray[index].Value.rtreeIndices[j]);
+                            }
+                        }
+
+                    }
+                }
+            });
+
+            for (int i = 0; i < cellsArray.Length; i++)
+            {
+                cellsArray[i].Value.isovistIndeces = resultsDot[i];
+            }
+            //    for (int i = 0; i < cellsArray.Length; i++)
+            //{
+            //    Point3d centroid = new Point3d(cellsArray[i].Value.location.X, cellsArray[i].Value.location.X, 0);
+            //    rTree.Search(
+            //      new Sphere(centroid, 30),
+            //      (sender, args) =>
+            //      {
+            //          int nearbyMeshIndex = args.Id;
+            //          SmartCell nearbyCell = cellsArray[nearbyMeshIndex].Value;
+            //          cellsArray[i].Value.rtreeIndices.Add(cellsArray[nearbyMeshIndex].Key);
+            //      });
+
+            //    var nurbsCrv = cellsArray[i].Value.isoPolyline.ToNurbsCurve();
+            //    for (int j = 0; j < cellsArray[i].Value.rtreeIndices.Count; j++)
+            //    {
+            //        if (nurbsCrv != null)
+            //        {
+            //            SmartCell relCell;
+            //            if(cells.TryGetValue(cellsArray[i].Value.rtreeIndices[j], out relCell))
+            //            {
+            //                if (nurbsCrv.Contains(new Point3d(relCell.location.X, relCell.location.Y, 0), _plane, 0.01) == PointContainment.Inside)
+            //                {
+            //                    // Rhino.RhinoApp.WriteLine("This is is inside a curve: " + cella.Key.ToString());
+            //                    cellsArray[i].Value.isovistIndeces.Add(cellsArray[i].Value.rtreeIndices[j]);
+            //                }
+            //            }
+
+            //        }
+            //    }
+            //}
+            ////for each cell, find the indeces of all other cells included in their isovist
+            //foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            //    foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+            //        if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
+            //        {
+            //            var nurbsCrv = cell.Value.isoPolyline.ToNurbsCurve();
+
+            //            if (nurbsCrv != null)
+            //            {
+            //                if (nurbsCrv.Contains(new Point3d(cella.Value.location.X, cella.Value.location.Y, 0), _plane, 0.01) == PointContainment.Inside)
+            //                {
+            //                    // Rhino.RhinoApp.WriteLine("This is is inside a curve: " + cella.Key.ToString());
+            //                    cell.Value.isovistIndeces.Add(cella.Key);
+            //                }
+            //            }
+            //        }
+
+
+            var min = double.MaxValue;
+            var max = double.MinValue;
+
+
+
+            int[] indi = Enumerable.Range(0, cellsArray.Length).ToArray();
+
+            double[] results = new double[cellsArray.Length];
+            System.Threading.Tasks.Parallel.ForEach(indi, (index) =>
+            {
+
+                Point3d centroid = new Point3d(cellsArray[index].Value.location.X, cellsArray[index].Value.location.X, 0);
+
+                double setDiffSum = 0;
+                var nurbsCrv = cellsArray[index].Value.isoPolyline.ToNurbsCurve();
+                var relevantCells = cellsArray[index].Value.rtreeIndices;
+
+                for (int j = 0; j < relevantCells.Count; j++)
+                {
+                    SmartCell relCell;
+                    if (cells.TryGetValue(relevantCells[j], out relCell))
+                    {
+                        var isoKeyList = relCell.isovistIndeces;
+                        if(relevantCells[j] != cellsArray[index].Key)
+                            if (isoKeyList.Contains(cellsArray[index].Key))
+                            {
+                                var intersect = isoKeyList.Intersect(cellsArray[index].Value.isovistIndeces);
+                                setDiffSum += intersect.Count(); //count
+                            }
+                    }
+                }
+
+                //Rhino.RhinoApp.WriteLine("before: " + setDiffSum.ToString()); //count
+
+                var coeff = setDiffSum /= (((double)relevantCells.Count)); //averaging function
+
+                //Rhino.RhinoApp.WriteLine("after: " + setDiffSum.ToString()); //count
+
+               // var coeff = cellsArray[index].Value.isovistIndeces.Count() / ((double)setDiffSum);
+
+                //Rhino.RhinoApp.WriteLine("coeff: " + coeff.ToString()); //count
+
+                if (!PBUtilities.HasValue(coeff))
+                    coeff = 0.0;
+
+                if (PBUtilities.HasValue(coeff))
+                {
+                    //if (coeff > 10.0)
+                    //    coeff = 10.0;
+
+                    if (coeff > max)
+                        max = coeff;
+                    if (coeff < min)
+                        min = coeff;
+
+                    //cellsArray[index].Value.clusterRaw = coeff;
+
+                    results[index] = coeff;
+                    //Rhino.RhinoApp.WriteLine(coeff.ToString()); //count
+                }
+
+            });
+
+            for (int i = 0; i < cellsArray.Length; i++)
+            {
+                cellsArray[i].Value.clusterRaw = results[i];
+            }
+
+            //for (int i = 0; i < cellsArray.Length; i++)
+            //{
+            //    Point3d centroid = new Point3d(cellsArray[i].Value.location.X, cellsArray[i].Value.location.X, 0);
+
+            //    double setDiffSum = 0;
+            //    var nurbsCrv = cellsArray[i].Value.isoPolyline.ToNurbsCurve();
+            //    var relevantCells = cellsArray[i].Value.rtreeIndices;
+
+
+            //    for (int j = 0; j < relevantCells.Count; j++)
+            //    {
+            //        SmartCell relCell;
+            //        if (cells.TryGetValue(relevantCells[j], out relCell))
+            //        {
+            //            var isoKeyList = relCell.isovistIndeces;
+            //            if (isoKeyList.Contains(cellsArray[i].Key))
+            //            {
+            //                var intersect = isoKeyList.Intersect(cellsArray[i].Value.isovistIndeces);
+            //                setDiffSum += intersect.Count(); //count
+            //            }
+            //        }
+            //    }
+
+            //    //Rhino.RhinoApp.WriteLine("before: " + setDiffSum.ToString()); //count
+
+            //    setDiffSum /= (((double)relevantCells.Count) - 1); //averaging function
+
+            //    //Rhino.RhinoApp.WriteLine("after: " + setDiffSum.ToString()); //count
+
+            //    var coeff = cellsArray[i].Value.isovistIndeces.Count() / ((double)setDiffSum);
+
+            //    //Rhino.RhinoApp.WriteLine("coeff: " + coeff.ToString()); //count
+
+            //    if (!PBUtilities.HasValue(coeff))
+            //        coeff = 0.0;
+
+            //    if (PBUtilities.HasValue(coeff))
+            //    {
+
+            //        if (coeff > max)
+            //            max = coeff;
+            //        if (coeff < min)
+            //            min = coeff;
+
+            //        cellsArray[i].Value.clusterRaw = coeff;
+            //        //Rhino.RhinoApp.WriteLine(coeff.ToString()); //count
+            //    }
+
+
+            //}
 
             //foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             //{
             //    double setDiffSum = 0;
             //    //Rhino.RhinoApp.WriteLine(string.Format("Number of cells in this iso is {0}", cell.Value.isovistIndeces.Count));
 
-            //    foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
-            //    {
-            //        if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
-            //        {
-            //            var isoKeyList = cella.Value.isovistIndeces;
+            //    //foreach (KeyValuePair<Vector2dInt, SmartCell> cella in cells)
+            //    //{
+            //    //    if (!(cell.Key.X == cella.Key.X && cell.Key.Y == cella.Key.Y))
+            //    //    {
+            //    //        var isoKeyList = cella.Value.isovistIndeces;
 
-            //            if (isoKeyList.Contains(cell.Key))
-            //            {
-            //                var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
-            //                //var intersect = 10.0;
-            //               // Rhino.RhinoApp.WriteLine("Intersection count: " + intersect); //count
-            //               //Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
-            //                setDiffSum += intersect.Count(); //count
-            //            }
-            //        }
-            //    }
+            //    //        if (isoKeyList.Contains(cell.Key))
+            //    //        {
+            //    //            var intersect = cella.Value.isovistIndeces.Intersect(cell.Value.isovistIndeces);
+            //    //            //var intersect = 10.0;
+            //    //            // Rhino.RhinoApp.WriteLine("Intersection count: " + intersect); //count
+            //    //            //Rhino.RhinoApp.WriteLine(cell.Value.isovistIndeces.Count().ToString());
+            //    //            setDiffSum += intersect.Count(); //count
+            //    //        }
+            //    //        else
+            //    //            continue;
+            //    //    }
+            //    //    else
+            //    //        continue;
+            //    //}
 
             //    setDiffSum /= (cells.Count - 1 * 1.0);
 
             //    var coeff = cell.Value.isovistIndeces.Count() / setDiffSum * 1.0;
-            //    if (coeff > 20.0)
-            //        coeff = 20.0;
-            //    if (coeff == double.NaN)
+
+            //    if (coeff == double.NaN || coeff == double.PositiveInfinity)
             //        coeff = 0.0;
+
+
+            //    if (coeff > max)
+            //        max = coeff;
+            //    if (coeff < min)
+            //        min = coeff;
+
             //    cell.Value.clusterRaw = coeff;
-
-            //   // Rhino.RhinoApp.WriteLine(cell.Value.clusterRaw.ToString()); //count
-
+            //    Rhino.RhinoApp.WriteLine(coeff.ToString()); //count
 
 
+            //}
 
-            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
-                {
-                    var holder = PBUtilities.mapValue(cell.Value.clusterRaw, min, max, 0.00, 1.00);
-                    cell.Value.clusterRemap = holder;
-                }
+
+
+
+            for (int i = 0; i < cellsArray.Length; i++)
+            {
+                var holder = PBUtilities.mapValue(cellsArray[i].Value.clusterRaw, min, max, 0.00, 1.00);
+                cellsArray[i].Value.clusterRemap = 1.0-holder;
+            }
         }
 
         /// <summary>
@@ -1449,29 +1506,18 @@ namespace PlanBee
         /// <param name="cellTo"></param>
         /// <returns></returns>
 
-        public bool CheckVizFromOneCellToAnother(SmartCell cellFrom, SmartCell cellTo)
+        public bool CheckVizFromOneCellToAnother(SmartCell cellFrom, SmartCell cellTo, Mesh mesh)
         {
             bool visible = true;
-            Vector3d vec = new Point3d(cellTo.location.X, cellTo.location.Y, 0) - new Point3d(cellFrom.location.X, cellFrom.location.Y, 0);
-            Ray3d ray = new Ray3d(new Point3d(cellFrom.location.X, cellFrom.location.Y, 0), vec);
+            //Vector3d vec = new Point3d(cellTo.location.X, cellTo.location.Y, 0) - new Point3d(cellFrom.location.X, cellFrom.location.Y, 0);
+            Line line = new Line(new Point3d(cellTo.location.X, cellTo.location.Y, 0), new Point3d(cellFrom.location.X, cellFrom.location.Y, 0));
+            //Ray3d ray = new Ray3d(new Point3d(cellFrom.location.X, cellFrom.location.Y, 0), vec);
 
-            if (Rhino.Geometry.Intersect.Intersection.MeshRay(interiorPartitionMesh, ray) > 0.0)
-            {
-                visible = false;
-                return visible;
+            int[] faceIds;
+            Rhino.Geometry.Intersect.Intersection.MeshLine(mesh, line, out faceIds);
+            if (faceIds == null || faceIds.Length < 1)
+                visible = true;
 
-            }
-            if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshCore, ray) > 0.0)
-            {
-                visible = false;
-                return visible;
-            }
-
-            if (Rhino.Geometry.Intersect.Intersection.MeshRay(meshOutline, ray) > 0.0)
-            {
-                visible = false;
-                return visible;
-            }
             return visible;
         }
 
@@ -1673,7 +1719,7 @@ namespace PlanBee
                         //    minDist = distance;
 
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Rhino.RhinoApp.WriteLine(e.ToString());
                     }
@@ -1688,7 +1734,7 @@ namespace PlanBee
                 count++;
             }
 
-                foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
+            foreach (KeyValuePair<Vector2dInt, SmartCell> cell in cells)
             {
                 var holder = PBUtilities.mapValue(cell.Value.metric4, min, max, 0.00, 1.00);
                 var final = 1.0 - holder;

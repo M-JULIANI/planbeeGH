@@ -67,6 +67,12 @@ namespace PlanBee
                         .Select(g => g.Select(x => x.item));
         }
 
+        // Or IsNanOrInfinity
+        public static bool HasValue(this double value)
+        {
+            return !Double.IsNaN(value) && !Double.IsInfinity(value);
+        }
+
         //public static long FactorialR(int inputVal)
         //{
         //    if (inputVal == 1)
