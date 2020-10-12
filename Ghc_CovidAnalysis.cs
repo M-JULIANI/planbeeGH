@@ -53,6 +53,7 @@ namespace PlanBee
             pManager[IN_plane].Optional = true;
             IN_perimCrv = pManager.AddCurveParameter("Perimeter Curve", "Perimeter Curve", "Perimeter Curve", GH_ParamAccess.item);
             IN_coreCrvs = pManager.AddCurveParameter("Core Curve(s)", "Core Curve(s)", "Core Curve(s)", GH_ParamAccess.list);
+            pManager[IN_coreCrvs].Optional = true;
             IN_voxelRects = pManager.AddRectangleParameter("Voxels", "Voxels", "Voxels for analysis", GH_ParamAccess.list);
             IN_obstacleCrvs = pManager.AddCurveParameter("Obstacle Curves/ Interior Partitions", "Interior Partitions", "The interior partitions/obstacle curves used to do Covid analysis", GH_ParamAccess.list);
         }
@@ -83,8 +84,10 @@ namespace PlanBee
             DA.GetData(IN_perimCrv, ref perimCrv);
             DA.GetDataList(IN_voxelRects, rectangles);
             DA.GetDataList(IN_obstacleCrvs, obstacleCrvs);
+            bool coreReceived = DA.GetDataList(IN_coreCrvs, coreCrvs);
 
-            _plan = new SmartPlan(perimCrv, coreCrvs, rectangles, obstacleCrvs, plane);
+                _plan = new SmartPlan(perimCrv, coreCrvs, rectangles, obstacleCrvs, plane);
+
             Rhino.RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
             Rhino.UnitSystem system = doc.ModelUnitSystem;
             _plan.projectUnits = system.ToString() == "Meters" ? 0 : 1;
