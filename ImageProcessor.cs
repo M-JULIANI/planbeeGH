@@ -1,35 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using System.IO;
-using System.Data;
 using System.Drawing;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 
-using Rhino.DocObjects;
-using Rhino.Collections;
-using GH_IO;
-using GH_IO.Serialization;
 using Rhino.Geometry;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
 
 namespace PlanBee
 {
+
+    #region ImageProcessing Classes
     public class ImageProcessor
     {
             public double ptSpacing;
             public Bitmap imageBit;
             public List<string> clrList;
-            public List<string> progNames;
             public DataTree<Point3d> _areaPoints;
             public DataTree<Point3d> _ProcessedPts;
             public DataTree<Point3d> _ProcessedPts2;
@@ -45,12 +32,10 @@ namespace PlanBee
 
             public SortedDictionary<Vector2d, Point3d> initPointDict;
 
-            public ImageProcessor(string bitmapString, List<string> colorList, List<string> programNames, double ptSpacing)
+            public ImageProcessor(string bitmapString, List<string> colorList)
             {
-                this.ptSpacing = ptSpacing;
                 imageBit = new Bitmap(bitmapString);
                 clrList = colorList;
-                progNames = programNames;
                 _areaPoints = new DataTree<Point3d>();
                 _vizPts = new Point3d[clrList.Count, clrList.Count];
                 _progCentroids = new Point3d[clrList.Count]; //derived program centroid from image
@@ -192,26 +177,6 @@ namespace PlanBee
                 }
             }
 
-        public Point3d Mean(List<Point3d> points)
-        {
-            var nLength = points.Count;
-            Point3d totalPre = new Point3d(0, 0, 0);
-            double X = 0.0;
-            double Y = 0.0;
-            double Z = 0.0;
-            for (int i = 0; i < nLength; i++)
-            {
-                X += points[i].X;
-                Y += points[i].Y;
-                Z += points[i].Z;
-            }
-            X /= nLength;
-            Y /= nLength;
-            Z /= nLength;
-            Point3d mean = new Point3d(X, Y, Z);
-            return mean;
-        }
-
         public void CollectPtsFromImage()
             {
 
@@ -282,7 +247,7 @@ namespace PlanBee
                             }
                             else continue;
                         }
-                    var m = Mean(areaPts[i]);
+                    var m = PBUtilities.Mean(areaPts[i]);
                     _progCentroids[i] = m;
                 }
 
@@ -296,7 +261,7 @@ namespace PlanBee
                 {
                     for (int k = 0; k < _progCentroids.Length; k++)
                     {
-                        _vizPts[j, k] = new Point3d(j * ptSpacing, -k * ptSpacing, 0);
+                        _vizPts[j, k] = new Point3d(j, -k, 0);
                     }
                 }
             }
@@ -337,4 +302,174 @@ namespace PlanBee
         }
 
     }
+
+    #endregion
+
+
+
+    #region Boundary Extrracting Classes
+    public class BoundaryExtractor
+    {
+        public DataTree<Point3d> pointTree;
+        //public List<Point3d> centroids;
+
+        public List<int> tempPt = new List<int>();
+        public List<int> origPt = new List<int>();
+        public DataTree<Point3d> outTree;
+        public SortedDictionary<Vector2d, smPoint> mainDict;
+
+        public BoundaryExtractor(DataTree<Point3d> pTree, List<Point3d> centList)
+        {
+            pointTree = pTree;
+            outTree = new DataTree<Point3d>();
+            // centroids = new List<Point3d>();
+            for (int i = 0; i < pointTree.BranchCount; i++)
+            {
+                BranchWork(pointTree.Branch(i), i, centList[i]);
+            }
+        }
+
+        public void BranchWork(List<Point3d> pointList, int branchIndex, Point3d centroid)
+        {
+            mainDict = new SortedDictionary<Vector2d, smPoint>();
+
+            Vector2d indexTemp;
+            for (int i = 0; i < pointList.Count; i++)
+            {
+                indexTemp = new Vector2d(pointList[i].X, pointList[i].Y);
+                smPoint pt;
+                if (mainDict.TryGetValue(indexTemp, out pt))
+                    continue;
+                else
+                    mainDict.Add(indexTemp, new smPoint(pointList[i]));
+            }
+
+            var cent = centroid;
+            //centroids.Add(cent);
+            var holdPts = mainDict.Values.OrderBy(s => s.pt.DistanceTo(cent)).Select(s => s.pt).ToList();
+
+            List<Point3d> ptStore = new List<Point3d>();
+            ptStore.AddRange(holdPts);
+
+            origPt.Add(ptStore.Count);
+
+            int sCount = 0;
+
+            List<Point3d> branchPts;
+            while (ptStore.Count > 0)
+            {
+                branchPts = TraverseDict(ptStore[0], mainDict);
+
+                if (branchPts != null && branchPts.Count > 0)
+                {
+                    if (branchPts.Count > 200)
+                        outTree.AddRange(branchPts, new GH_Path(branchIndex, sCount));
+                    for (int j = 0; j < branchPts.Count; j++)
+                        ptStore.Remove(branchPts[j]);
+
+                    tempPt.Add(ptStore.Count);
+
+                    sCount++;
+                }
+                else
+                    ptStore.Remove(ptStore[0]);
+            }
+        }
+
+        public List<Point3d> TraverseDict(Point3d startPt, SortedDictionary<Vector2d, smPoint> dict)
+        {
+            var outPts = new List<Point3d>();
+
+            Vector2d activeOne = new Vector2d(startPt.X, startPt.Y);
+
+            bool stillGoin = true;
+
+            while (stillGoin)
+            {
+                Vector2d next = Vector2d.Unset;
+
+                int degree = 1;
+                bool hasN = false;
+                while (degree < 3)
+                {
+                    Vector2d holder = Vector2d.Unset;
+                    hasN = GetActiveNeighbors(degree, activeOne, dict, out holder);
+                    if (hasN)
+                    {
+                        next = holder;
+                        goto nextSec;
+                    }
+                    degree++;
+                }
+
+            nextSec:
+                if (hasN && next != Vector2d.Unset)
+                {
+                    smPoint sp;
+                    if (dict.TryGetValue(next, out sp))
+                    {
+                        sp.isActive = false;
+                        outPts.Add(sp.pt);
+                        activeOne = next;
+                    }
+                }
+                else
+                    break;
+            }
+
+            return outPts;
+        }
+
+        public bool GetActiveNeighbors(int degree, Vector2d index, SortedDictionary<Vector2d, smPoint> dict, out Vector2d selected)
+        {
+            selected = Vector2d.Unset;
+
+            var neighbors = new List<Point3d>();
+
+            for (int yi = -degree; yi <= degree; yi++)
+            {
+                int y = (int)(yi + index.Y);
+
+                for (int xi = -degree; xi <= degree; xi++)
+                {
+                    int x = (int)(xi + index.X);
+
+                    var i = new Vector2d(x, y);
+
+                    if (index == i) continue;
+
+                    smPoint point;
+
+                    if (dict.TryGetValue(i, out point))
+                    {
+                        if (point.isActive)
+                        {
+                            selected = i;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+
+        }
+
+    }
+
+    public class smPoint
+    {
+        public Point3d pt;
+        public Vector2d index;
+        public bool isActive { get; set; }
+
+        public smPoint(Point3d pt)
+        {
+            this.pt = pt;
+            index = new Vector2d(pt.X, pt.Y);
+            isActive = true;
+        }
+    }
+
 }
+#endregion

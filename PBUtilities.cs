@@ -99,6 +99,33 @@ namespace PlanBee
 
             return n * factorial(n - 1);
         }
+
+
+        /// <summary>
+        /// Used for colors in image processing
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static Point3d Mean(List<Point3d> points)
+        {
+            var nLength = points.Count;
+            Point3d totalPre = new Point3d(0, 0, 0);
+            double X = 0.0;
+            double Y = 0.0;
+            double Z = 0.0;
+            for (int i = 0; i < nLength; i++)
+            {
+                X += points[i].X;
+                Y += points[i].Y;
+                Z += points[i].Z;
+            }
+            X /= nLength;
+            Y /= nLength;
+            Z /= nLength;
+            Point3d mean = new Point3d(X, Y, Z);
+            return mean;
+        }
+
     }
 
 }

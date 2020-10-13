@@ -106,6 +106,7 @@
     <Compile Include="Ghc_CovidAnalysis.cs" />
     <Compile Include="Ghc_DaylightAccess.cs" />
     <Compile Include="Ghc_ExitAccess.cs" />
+    <Compile Include="Ghc_ImageProcessor.cs" />
     <Compile Include="Ghc_Isovist.cs" />
     <Compile Include="Ghc_KohonenMap.cs" />
     <Compile Include="Ghc_NeighborhoodSize.cs" />
