@@ -65,19 +65,26 @@ namespace PlanBee
 
             var ptTree = engine.outTree;
 
-            DataTree<Polyline> treeOut = new DataTree<Polyline>();
+            //temp polylineTree
+            DataTree<Polyline> treeInterim = new DataTree<Polyline>();
             for (int i = 0; i < ptTree.BranchCount; i++)
             {
                 Polyline poly = new Polyline();
                 poly.AddRange(ptTree.Branch(i));
-                treeOut.Add(poly, new GH_Path(ptTree.Path(i)));
+                treeInterim.Add(poly, new GH_Path(ptTree.Path(i).Indices[0]));
+            }
 
+            //final output tree
+            DataTree<Polyline> treeOut = new DataTree<Polyline>();
+            for (int i = 0; i < treeInterim.BranchCount; i++)
+            {
+                if (treeInterim.Branch(i).Count == 2)
+                    treeOut.Add(treeInterim.Branch(i).OrderByDescending(l => l.Length).ToArray()[0], new GH_Path(treeInterim.Path(i)));
+                else
+                    treeOut.AddRange(treeInterim.Branch(i), new GH_Path(treeInterim.Path(i)));
             }
 
             DA.SetDataTree(OUT_polyTree, treeOut);
-
-
-
         }
 
         /// <summary>
