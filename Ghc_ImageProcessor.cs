@@ -1,4 +1,6 @@
-﻿using Grasshopper.Kernel;
+﻿using Grasshopper;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
@@ -14,22 +16,24 @@ namespace PlanBee
         ImageProcessor imageProcessor;
 
         public Ghc_ImageProcessor()
-         : base("Plan Cells", "Cells",
-             "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed",
+         : base("Image Processor", "Image Processor",
+             "Derive primeter, core, and interior partition polygons from a .jpg image by drawing them in 3 separate RGB colors and specifying those colors as inputs to this component",
              "PlanBee", "Inputs")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
 
         int IN_imagePath;
         int IN_colList;
 
+        int OUT_polyTree;
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             IN_imagePath = pManager.AddTextParameter("Image Path", "Path", "The path to a local .jpg", GH_ParamAccess.item);
-            IN_colList = pManager.AddTextParameter("Color List As String", "Color Liss", "Color list (of RGB strings).", GH_ParamAccess.list);
+            IN_colList = pManager.AddTextParameter("Color List As String", "Color List", "Color list (of RGB strings).", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -37,11 +41,8 @@ namespace PlanBee
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            OUT_areaFeedback = pManager.AddTextParameter("Area feedback", "Area feedback", "Provides feedback as to whether desired areas are being met with current configuration", GH_ParamAccess.item);
-            OUT_cells = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "Analysis unit size", GH_ParamAccess.list);
-            OUT_perimeter = pManager.AddCurveParameter("Perimeter Curve", "Perimeter", "The curve that describes the extents of the floor plan boundary", GH_ParamAccess.item);
-            OUT_core = pManager.AddCurveParameter("Core Curve", "Core", "The curve that describes the extents of the core boundaries", GH_ParamAccess.list);
-            OUT_resolution = pManager.AddNumberParameter("Resolution", "Resolution", "This final resolution may differ from the input resolution as this component takes care of ensuring the resolution isn't too fine or coarse.", GH_ParamAccess.item);
+            OUT_polyTree = pManager.AddCurveParameter("Polylines", "Polylines", "Polyline tree describing the different colored polygons by branch.", GH_ParamAccess.item);
+           
         }
 
 
@@ -56,6 +57,27 @@ namespace PlanBee
 
             imageProcessor = new ImageProcessor(path, colList);
 
+            var areaPts = imageProcessor._areaPoints;
+            var programCentroids = imageProcessor._progCentroids;
+            var perimPts = imageProcessor._ProcessedPts;
+
+            BoundaryExtractor engine = new BoundaryExtractor(perimPts, programCentroids);
+
+            var ptTree = engine.outTree;
+
+            DataTree<Polyline> treeOut = new DataTree<Polyline>();
+            for (int i = 0; i < ptTree.BranchCount; i++)
+            {
+                Polyline poly = new Polyline();
+                poly.AddRange(ptTree.Branch(i));
+                treeOut.Add(poly, new GH_Path(ptTree.Path(i)));
+
+            }
+
+            DA.SetDataTree(OUT_polyTree, treeOut);
+
+
+
         }
 
         /// <summary>
@@ -67,7 +89,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return PlanBee.Properties.Resources.Cells;
+                return PlanBee.Properties.Resources.ImageProcessor_01;
             }
         }
 

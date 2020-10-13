@@ -318,7 +318,7 @@ namespace PlanBee
         public DataTree<Point3d> outTree;
         public SortedDictionary<Vector2d, smPoint> mainDict;
 
-        public BoundaryExtractor(DataTree<Point3d> pTree, List<Point3d> centList)
+        public BoundaryExtractor(DataTree<Point3d> pTree, Point3d [] centList)
         {
             pointTree = pTree;
             outTree = new DataTree<Point3d>();
