@@ -121,6 +121,7 @@
     <Compile Include="Ghc_MSPSampled.cs" />
     <Compile Include="Ghc_PlanBeeInfo.cs" />
     <Compile Include="Grid2d.cs" />
+    <Compile Include="ImageProcessor.cs" />
     <Compile Include="KMap.cs" />
     <Compile Include="PBSun.cs" />
     <Compile Include="PBUtilities.cs" />
