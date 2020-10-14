@@ -1522,7 +1522,6 @@ namespace PlanBee
 
                         //if (distance < minDist)
                         //    minDist = distance;
-
                     }
                     catch (Exception e)
                     {

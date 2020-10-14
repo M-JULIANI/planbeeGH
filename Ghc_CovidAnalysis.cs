@@ -64,7 +64,7 @@ namespace PlanBee
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             OUT_hit = pManager.AddIntegerParameter("Collisions", "Collisions", " 0 = no collision, 1 = collision", GH_ParamAccess.list);
-            OUT_lines = pManager.AddLineParameter("Collision lines", "Collision ines", "Collision lines used to determine whether a cell is compromised", GH_ParamAccess.tree);
+            OUT_lines = pManager.AddLineParameter("Collision lines", "Collision lines", "Collision lines used to determine whether a cell is compromised", GH_ParamAccess.tree);
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace PlanBee
         public int maxIters = 0;
         public Input[] inputs;
         public DataTree<double> inputW;
-        public int numWeights = 4;
+        public int numWeights;
         public double cRadius = double.NaN;
 
         public List<Point3d> nodePoints;
@@ -52,6 +52,8 @@ namespace PlanBee
 
             bmuMultiplier = BMUradMultiplier;
             maxIters = maxIterations;
+
+            this.numWeights = numW;
             
             cRadius = resolution / 2.0;
             
@@ -415,7 +417,7 @@ namespace PlanBee
                         if (location == 6)
                         {
                             var tempList = new List<IntervalSorter>();
-                            for (int f = 0; f < 7; f++)
+                            for (int f = 0; f < programAreas.Count; f++)
                             {
                                 var delta = programAreas[f] - progA[f];
 

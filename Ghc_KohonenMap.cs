@@ -49,6 +49,7 @@ namespace PlanBee
         int IN_programData;
         int IN_programColors;
         int IN_pRects;
+        int IN_numMetrics;
         int IN_pWeights;
         int IN_resolution;
         int IN_radMultiplier;
@@ -73,6 +74,7 @@ namespace PlanBee
             IN_programData = pManager.AddNumberParameter("Program Data", "Program Data", "Program vectors used to describe the features of each program (coming from 'Parse Program Data' component", GH_ParamAccess.tree);
             IN_programColors = pManager.AddColourParameter("Program Colors", "Program Colors", "An ordered list of the corresponding colors representing each program", GH_ParamAccess.list);
             IN_pRects = pManager.AddRectangleParameter("Voxels", "Voxels", "Voxels used for Kohonen SOM", GH_ParamAccess.list);
+            IN_numMetrics = pManager.AddIntegerParameter("Number of Metrics", "Number of Metrics", "Number of Metrics used for KSOM. This should match the length of each branch in of 'voxel weights'.", GH_ParamAccess.item);
             IN_pWeights = pManager.AddNumberParameter("Voxel Weights", "Voxel Weights", "Voxel weights used as a multidimensional vector describing each voxel's features", GH_ParamAccess.tree);
             IN_resolution = pManager.AddNumberParameter("Voxel Resolution", "Voxel Resolution", "The resolution describing the size of the voxels", GH_ParamAccess.item);
             IN_radMultiplier = pManager.AddNumberParameter("Initial radius multiplier", "Radius multiplier", "Initial radius multiplier used for Kohonen SOM", GH_ParamAccess.item);
@@ -110,8 +112,10 @@ namespace PlanBee
             DataTree<double> mod_pWeights;
             string message = "nothing";
             bool optimized = false;
+            int numMetrics = -1;
 
 
+            DA.GetData(IN_numMetrics, ref numMetrics);
             DA.GetData(IN_reset, ref reset);
             DA.GetData(IN_run, ref run);
             DA.GetData(IN_mode, ref optimized);
@@ -182,7 +186,7 @@ namespace PlanBee
                     }
 
                     //DA.SetDataTree(OUT_nodeWeights,mod_pWeights);
-                    SOM = new KMap(mod_pData, points, _resolution, mod_pWeights, 4, 0.12, radii, 1.0, maximumIterations);
+                    SOM = new KMap(mod_pData, points, _resolution, mod_pWeights, numMetrics, 0.12, radii, 1.0, maximumIterations);
 
                     SOM.applyProgramInputs(pNames.Count);
                     SOM.outputNodesXY();

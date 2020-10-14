@@ -71,6 +71,7 @@ namespace PlanBee
             {
                 Polyline poly = new Polyline();
                 poly.AddRange(ptTree.Branch(i));
+                poly.Add(ptTree.Branch(i)[0]);
                 treeInterim.Add(poly, new GH_Path(ptTree.Path(i).Indices[0]));
             }
 
