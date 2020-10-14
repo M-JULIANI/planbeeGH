@@ -13,7 +13,9 @@ namespace PlanBee
         /// </summary>
         public Ghc_PlanCells()
           : base("Plan Cells", "Cells",
-              "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed",
+              "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed. " +
+                "This component also takes a program input .csv and is able to report on whether the floor plate is large enough" +
+                "to contain the desired program mix. It is also capable of taking multiple cores/stairs (holes) in the form of closed curves.",
               "PlanBee", "Inputs")
         {
         }

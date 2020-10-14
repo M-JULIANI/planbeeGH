@@ -11,8 +11,9 @@ namespace PlanBee
         /// Initializes a new instance of the GhcSingleSpaceCells class.
         /// </summary>
         public Ghc_SingleSpaceCells()
-          : base("GhcSingleSpaceCells", "Single Space Cells",
-              "Single Space Cells",
+          : base("Simplest Plan Cells", "Simplest Cells",
+              "Simple plan cells (analysis grid) created from a single perimeter curve. This is the simplest plan grid type" +
+                "as it only takes a perimeter curve. A good use case for this would be a building corridor for example.",
               "PlanBee", "Inputs")
         {
         }

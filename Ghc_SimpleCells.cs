@@ -14,7 +14,8 @@ namespace PlanBee
         public Ghc_SimpleCells()
           : base("Simple Plan Cells", "Simple Cells",
               "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed." +
-                "No need for core/ partition/ area inputs.",
+                "This component takes a perimeter curve and some core/stair/hole curves. This is for when no program information is " +
+                "required.",
               "PlanBee", "Inputs")
         {
         }
