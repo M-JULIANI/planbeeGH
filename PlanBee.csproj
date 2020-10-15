@@ -97,35 +97,35 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AxisVector2dInt.cs" />
-    <Compile Include="Base\GH_AsyncComponent.cs" />
-    <Compile Include="Base\WorkerInstance.cs" />
-    <Compile Include="Face.cs" />
-    <Compile Include="Ghc_AnalysisPeriod.cs" />
-    <Compile Include="Ghc_Attractions.cs" />
-    <Compile Include="Ghc_CovidAnalysis.cs" />
-    <Compile Include="Ghc_DaylightAccess.cs" />
-    <Compile Include="Ghc_ExitAccess.cs" />
-    <Compile Include="Ghc_ImageProcessor.cs" />
-    <Compile Include="Ghc_Isovist.cs" />
-    <Compile Include="Ghc_KohonenMap.cs" />
-    <Compile Include="Ghc_NeighborhoodSize.cs" />
-    <Compile Include="Ghc_ParsePrograms.cs" />
-    <Compile Include="Ghc_PerimeterDistance.cs" />
-    <Compile Include="Ghc_PlanCells.cs" />
-    <Compile Include="Ghc_SimpleCells.cs" />
-    <Compile Include="Ghc_SingleSpaceCells.cs" />
-    <Compile Include="Ghc_BetweenPaths.cs" />
-    <Compile Include="Ghc_ClusteringCoefficient.cs" />
-    <Compile Include="Ghc_ExitAccessBetween.cs" />
-    <Compile Include="Ghc_MeanShortestPaths.cs" />
-    <Compile Include="Ghc_MSPSampled.cs" />
-    <Compile Include="Ghc_PlanBeeInfo.cs" />
-    <Compile Include="Grid2d.cs" />
-    <Compile Include="ImageProcessor.cs" />
-    <Compile Include="KMap.cs" />
-    <Compile Include="PBSun.cs" />
-    <Compile Include="PBUtilities.cs" />
+    <Compile Include="Grid\AxisVector2dInt.cs" />
+    <Compile Include="GH Async Test\GH_AsyncComponent.cs" />
+    <Compile Include="GH Async Test\WorkerInstance.cs" />
+    <Compile Include="Grid\Face.cs" />
+    <Compile Include="GH Components\Ghc_AnalysisPeriod.cs" />
+    <Compile Include="GH Components\Ghc_Attractions.cs" />
+    <Compile Include="GH Components\Ghc_CovidAnalysis.cs" />
+    <Compile Include="GH Components\Ghc_DaylightAccess.cs" />
+    <Compile Include="GH Components\Ghc_ExitAccess.cs" />
+    <Compile Include="GH Components\Ghc_ImageProcessor.cs" />
+    <Compile Include="GH Components\Ghc_Isovist.cs" />
+    <Compile Include="GH Components\Ghc_KohonenMap.cs" />
+    <Compile Include="GH Components\Ghc_NeighborhoodSize.cs" />
+    <Compile Include="GH Components\Ghc_ParsePrograms.cs" />
+    <Compile Include="GH Components\Ghc_PerimeterDistance.cs" />
+    <Compile Include="GH Components\Ghc_PlanCells.cs" />
+    <Compile Include="GH Components\Ghc_SimpleCells.cs" />
+    <Compile Include="GH Components\Ghc_SingleSpaceCells.cs" />
+    <Compile Include="GH Components\Ghc_BetweenPaths.cs" />
+    <Compile Include="GH Components\Ghc_ClusteringCoefficient.cs" />
+    <Compile Include="GH Components\Ghc_ExitAccessBetween.cs" />
+    <Compile Include="GH Components\Ghc_MeanShortestPaths.cs" />
+    <Compile Include="GH Components\Ghc_MSPSampled.cs" />
+    <Compile Include="GH Components\Ghc_PlanBeeInfo.cs" />
+    <Compile Include="Grid\Grid2d.cs" />
+    <Compile Include="Utilities\ImageProcessor.cs" />
+    <Compile Include="Utilities\KMap.cs" />
+    <Compile Include="Utilities\PBSun.cs" />
+    <Compile Include="Utilities\PBUtilities.cs" />
     <Compile Include="PlanBeeCategoryIcon.cs" />
     <Compile Include="PlanBeeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -134,8 +134,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SmartCell.cs" />
-    <Compile Include="SmartPlan.cs" />
+    <Compile Include="Grid\SmartCell.cs" />
+    <Compile Include="Grid\SmartPlan.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
