@@ -58,6 +58,7 @@ namespace PlanBee
         int IN_DisplayLabels;
 
         int OUT_programTree;
+        int OUT_programNames;
         int OUT_nodeWeights;
         int OUT_RunFeedback;
 
@@ -90,6 +91,7 @@ namespace PlanBee
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             OUT_RunFeedback = pManager.AddTextParameter("Run Status", "Run Status", "This output tells the user what run status this component is under", GH_ParamAccess.item);
+            OUT_programNames = pManager.AddTextParameter("Program Names", "Names", "Program names as organized by KSOM", GH_ParamAccess.tree);
             OUT_programTree = pManager.AddCurveParameter("Program Voxels", "Program Voxels", "Voxels assigned to their corresponding program tree", GH_ParamAccess.tree);
             OUT_nodeWeights = pManager.AddNumberParameter("Final node weights", "Node Weights", "The final node weights after the Kohonen SOM is done running", GH_ParamAccess.list);
         }
@@ -139,6 +141,7 @@ namespace PlanBee
             if (isRunning)
                 ExpireSolution(true);
 
+            var simpleNameTree = new DataTree<string>();
 
             try
             {
@@ -245,6 +248,14 @@ namespace PlanBee
                     var n = re.nodes;
                     var _tree = re.programTree;
 
+
+                    ///silly name tree output as requested..
+                    for (int i = 0; i < _tree.BranchCount; i++)
+                    {
+                        simpleNameTree.Add(_tree.Branch(i)[0].name.Split('_')[0], new GH_Path(i));
+                    }
+                    
+
                     //'tree' below is the sorted nodes corresponding to each program based on their BMU
                     var tempTree = new DataTree<sNode>();
 
@@ -343,6 +354,7 @@ namespace PlanBee
             DA.SetData(OUT_RunFeedback, message);
             DA.SetDataList(OUT_nodeWeights, SOM.nodeWeights);
             DA.SetDataTree(OUT_programTree, SOM.tree);
+            DA.SetDataTree(OUT_programNames, simpleNameTree);
         }
 
         public class SolveResults
