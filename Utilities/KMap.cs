@@ -414,7 +414,7 @@ namespace PlanBee
 
                     while (found == false)
                     {
-                        if (location == 6)
+                        if (location == programNames.Count-1)
                         {
                             var tempList = new List<IntervalSorter>();
                             for (int f = 0; f < programAreas.Count; f++)
