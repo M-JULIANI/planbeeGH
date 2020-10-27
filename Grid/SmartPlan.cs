@@ -2040,6 +2040,8 @@ namespace PlanBee
 
         public void AssignInactiveCells()
         {
+            if (interiorPartitionMesh == null)
+                return;
             foreach (KeyValuePair<Vector2dInt, SmartCell> _cell in cells)
             {
                 var pt = new Point3d(_cell.Value.location.X, _cell.Value.location.Y, 0);
