@@ -773,7 +773,7 @@ namespace PlanBee
         {
             tShoot = new List<string>();
             tShoot2 = new List<string>();
-            int max = 80;
+            int max = 120;
             int min = 5;
             BoundingBox bb = new BoundingBox(pts);
             var rangeX = bb.Max.X - bb.Min.X;
