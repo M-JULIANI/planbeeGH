@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using QuickGraph;
 
-
 namespace PlanBee
 {
     public class SmartPlan
@@ -2126,6 +2125,45 @@ namespace PlanBee
 
             return Path;
 
+        }
+
+        public double GetConvexity(out Polyline polyline)
+        {
+            double convexity = -1.0;
+            polyline = null;
+            try
+            {
+                var polys = Cells.Select(s => s.Value.rect.ToPolyline()).ToList();
+
+                List<Point3d> allPts = new List<Point3d>();
+                foreach(var p in polys)
+                {
+                    var segs = p.GetSegments();
+                    foreach(var s in segs)
+                        allPts.Add(s.From);
+                }
+
+                var convexHull = new ConvexHull2d(allPts);
+                convexHull.Init();
+                convexHull.Calculate();
+
+                polyline = convexHull.poly;
+                var convexArea = AreaMassProperties.Compute(convexHull.poly.ToNurbsCurve()).Area;
+                double cellArea = 0.0;
+
+                foreach (var c in this.Cells)
+                {
+                    cellArea += c.Value.rect.Area;
+                }
+
+                convexity = (cellArea * 1.0) / convexArea;
+            }
+            catch(Exception ex)
+            {
+                ex.ToString();
+            }
+
+            return convexity;
         }
 
         List<SmartCell> GetFinalPath(SmartCell a_StartingCell, SmartCell a_EndingCell)

@@ -97,6 +97,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GH Components\Ghc_Convexity.cs" />
     <Compile Include="Grid\AxisVector2dInt.cs" />
     <Compile Include="GH Async Test\GH_AsyncComponent.cs" />
     <Compile Include="GH Async Test\WorkerInstance.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="GH Components\Ghc_MSPSampled.cs" />
     <Compile Include="GH Components\Ghc_PlanBeeInfo.cs" />
     <Compile Include="Grid\Grid2d.cs" />
+    <Compile Include="Utilities\ConvexHull2d.cs" />
     <Compile Include="Utilities\ImageProcessor.cs" />
     <Compile Include="Utilities\KMap.cs" />
     <Compile Include="Utilities\PBSun.cs" />

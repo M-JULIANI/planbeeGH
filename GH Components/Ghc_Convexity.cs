@@ -4,19 +4,17 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
-namespace PlanBee
+namespace PlanBee.GH_Components
 {
-    public class Ghc_SimpleCells : GH_Component
+    public class Ghc_Convexity:GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the GhcSimpleCells class.
         /// </summary>
-        public Ghc_SimpleCells()
-          : base("Simple Plan Cells", "Simple Cells",
-              "Plan voxels/ 'analysis grid' serving as the basic unit for which different analysis metrics are computed." +
-                "This component takes a perimeter curve and some core/stair/hole curves. This is for when no program information is " +
-                "required.",
-              "PlanBee", "Inputs")
+        public Ghc_Convexity()
+          : base("Convexity", "Convexity",
+              "Simple measure of convexity.",
+              "PlanBee", "Analysis")
         {
         }
 
@@ -26,7 +24,8 @@ namespace PlanBee
         int IN_resolution;
 
         int OUT_cells;
-        int OUT_resolution;
+        int OUT_convexity;
+        int OUT_poly;
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
@@ -47,9 +46,11 @@ namespace PlanBee
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             OUT_cells = pManager.AddRectangleParameter("Plan Voxels", "Voxels", "Analysis unit size", GH_ParamAccess.list);
-            OUT_resolution = pManager.AddNumberParameter("Resolution", "Resolution", "This final resolution may differ from the input resolution as this component takes care of ensuring the resolution isn't too fine or coarse.", GH_ParamAccess.item);
+            OUT_convexity = pManager.AddNumberParameter("Convexity", "Convexity", "Convexity - Area shape / area convex hull of shape.", GH_ParamAccess.item);
+            OUT_poly = pManager.AddCurveParameter("Convex Hull", "Convex Hull", "Convex Hull.", GH_ParamAccess.item);
+
         }
-    
+
 
         /// <summary>
         /// This is the method that actually does the work.
@@ -77,17 +78,16 @@ namespace PlanBee
 
             try
             {
+              //  _plan = new SmartPlan(perimeter, coreCrvs, _resolution, plane);
                 _plan = new SmartPlan(perimeter, coreCrvs, _resolution, plane);
                 var _cells = _plan.getCells();
-                int totalNeighbors = 0;
-                foreach(var c in _plan.Cells)
-                {
-                    var neighCount =_plan.GetNeighbors(c.Value).Count();
-                    totalNeighbors += neighCount;
-                }
+
+                Polyline convexHull;
+                var convexity = _plan.GetConvexity(out convexHull);
 
                 DA.SetDataList(OUT_cells, _cells);
-                DA.SetData(OUT_resolution, _plan._resolution);
+                DA.SetData(OUT_convexity, convexity);
+                DA.SetData(OUT_poly, convexHull);
             }
             catch (Exception e)
             {
@@ -104,7 +104,7 @@ namespace PlanBee
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return PlanBee.Properties.Resources.SimplifiedCells_01;
+                return null;
             }
         }
 
@@ -113,7 +113,7 @@ namespace PlanBee
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("6917b987-c63f-4365-bcdd-dd0cc5ce20cb"); }
+            get { return new Guid("4c736ad3-03ec-49f7-9e08-c0ca3f2f8deb"); }
         }
     }
 }
